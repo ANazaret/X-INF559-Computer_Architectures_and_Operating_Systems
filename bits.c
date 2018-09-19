@@ -150,7 +150,7 @@ NOTES:
  *   Rating: 1
  */
 int bitAnd(int x, int y) {
-  return 2;
+  return ~(~x|~y);
 }
 /* 
  * upperBits - pads n upper bits with 1's
@@ -161,7 +161,10 @@ int bitAnd(int x, int y) {
  *  Rating: 1
  */
 int upperBits(int n) {
-  return 2;
+  /* make use of the arithmetic shift */
+  int potential_one = !!n;
+  int oneleft = potential_one << 31;
+  return oneleft >> (n + ~0);
 }
 /* 
  * anyEvenBit - return 1 if any even-numbered bit in word set to 1
@@ -171,7 +174,10 @@ int upperBits(int n) {
  *   Rating: 2
  */
 int anyEvenBit(int x) {
-  return 2;
+  int byte_mask = 85;
+  byte_mask += byte_mask << 8;
+  byte_mask += byte_mask << 16;
+  return !!(byte_mask & x);
 }
 /* 
  * byteSwap - swaps the nth byte and the mth byte
@@ -183,7 +189,36 @@ int anyEvenBit(int x) {
  *  Rating: 2
  */
 int byteSwap(int x, int n, int m) {
-    return 2;
+/*
+ 55443322
+ swap(2,0)
+ 55003300
+	n*8 : n<<3
+	m*8 : m<<3
+*/
+
+	//int bytemask = 0xFF;
+	int n8 = n<<3;
+	int m8 = m<<3;
+	/*
+	int maskn = bytemask << n8;
+	int maskm = bytemask << m8;
+	return ( (((x&maskn) >> n8)&0xFF) << m8 ) |
+	( (((x&maskm) >> m8)&0xFF) << n8 ) | 
+	( x&~(maskm|maskn));
+	*/
+	
+	// From 15 op to 8 :) :) :) :)
+	
+	int xn8 = x >> n8;
+	int xm8 = x >> m8;
+	int combo = (xn8^xm8)&0xFF;
+	return x^( combo << n8 )^(combo << m8);
+	
+	
+	//Xor trick to avoid maskn and maskm ?  Done !!!!!
+	
+
 }
 /* 
  * conditional - same as x ? y : z 
@@ -193,7 +228,8 @@ int byteSwap(int x, int n, int m) {
  *   Rating: 3
  */
 int conditional(int x, int y, int z) {
-  return 2;
+  int mask = !x + ~0;
+  return (mask & y)|(~mask & z);
 }
 /* 
  * isAsciiDigit - return 1 if 0x30 <= x <= 0x39 (ASCII codes for characters '0' to '9')
@@ -205,7 +241,7 @@ int conditional(int x, int y, int z) {
  *   Rating: 3
  */
 int isAsciiDigit(int x) {
-  return 2;
+  return !( ((x>>4)^3) | (!( (~x & 8) | !(x&6) )));
 }
 /*
  * bitCount - returns count of number of 1's in word
@@ -215,7 +251,57 @@ int isAsciiDigit(int x) {
  *   Rating: 4
  */
 int bitCount(int x) {
-  return 2;
+  // Sort of recursivity : on 2 bits : AB -> A+B;
+  // on 4 bits : AB|CD , becomes A+B|C+D and then sum (A+B)+(C+D)
+  // Add odd bits with even bits, 2bits odds with 2bits even ...
+  // 0101 = 5
+  // 0011 = 3
+  // 1111 = F
+  // 0000 0000 0000 0000 0000 0000 0000 0000
+  
+  int evenbits;
+  int even2bits;
+  int even4bits;
+  int even8bits;
+  int tmp;
+  int signbit;
+  int sign;
+  
+  //Drop x sign which will be annoying for right shifts
+  signbit = 1<<31;
+  sign = x&signbit;
+  x = x&(~signbit);
+  //4
+  
+  evenbits = 0x55;
+  evenbits += evenbits << 8;
+  evenbits += evenbits << 16;
+  
+  even2bits = 0x33;
+  even2bits += even2bits << 8;
+  even2bits += even2bits << 16;
+  
+  even4bits = 0x0F;
+  even4bits += even4bits << 8;
+  even4bits += even4bits << 16;
+  
+  even8bits = 0xFF;
+  even8bits += even8bits << 16;
+  //14 op
+  
+  tmp = x;
+  tmp = (tmp&evenbits)  + ((tmp>>1)&evenbits); 
+  tmp = (tmp&even2bits) + ((tmp>>2)&even2bits);
+  tmp = (tmp&even4bits) + ((tmp>>4)&even4bits);
+  tmp = (tmp&even8bits) + ((tmp>>8)&even8bits); 
+  tmp = (tmp&0xFF) + (tmp >> 16);
+  //19
+  
+  return tmp+!!sign;
+  //3
+  
+  //XOR parité ? maxi 32 = bits ? to explore ...
+  
 }
 /* 2's complement */
 /* 
@@ -225,7 +311,7 @@ int bitCount(int x) {
  *   Rating: 1
  */
 int tmax(void) {
-  return 2;
+  return ~(1<<31);
 }
 /* 
  * negate - return -x 
@@ -235,7 +321,7 @@ int tmax(void) {
  *   Rating: 2
  */
 int negate(int x) {
-  return 2;
+  return ~x + 1;
 }
 /* 
  * fitsBits - return 1 if x can be represented as an 
@@ -247,7 +333,8 @@ int negate(int x) {
  *   Rating: 2
  */
 int fitsBits(int x, int n) {
-  return 2;
+  int nminus = n + ~0;
+  return (!(x>>nminus)) | (!(~x>>nminus));
 }
 /* 
  * addOK - Determine if can compute x+y without overflow
@@ -258,7 +345,23 @@ int fitsBits(int x, int n) {
  *   Rating: 3
  */
 int addOK(int x, int y) {
-  return 2;
+  int signmask = 1<<31;
+  int xsign = x&signmask;
+  int ysign = y; //No need for another signmask because always used in pairs with &xsign
+  
+  // if xsign and ysign are differents : OK  xsign^ysign
+  // if x,y < 0 (xsign&ysign) if (~x + ~y)&signmask --> NOT OK (
+  // if x,y > 0 ~(xsign|ysign) if (x+y)&signmask --> NOT OK
+  
+  // Goal : 1 on the left if it is not ok
+  // 1) RIEN
+  // 2) (xsign&ysign)&( (~x + ~y + 1)&signmask  )    ( signmask useless )
+  // 3) ~(xsign|ysign)&(x + y)&signmask
+  
+  return !(
+  	( (xsign&ysign)&( (~x + ~y + 1)  ) ) | 
+  	( ~(xsign|ysign)&(x + y)&signmask ) 
+  );  
 }
 /* 
  * isGreater - if x > y  then return 1, else return 0 
@@ -268,7 +371,27 @@ int addOK(int x, int y) {
  *   Rating: 3
  */
 int isGreater(int x, int y) {
-  return 2;
+ /*
+  * x > y <=> y-x < 0
+  *
+  * 1) handle y-x overflow ... (can happen only if y and x are opposite sign
+  * 
+  * 2) if y-x negative : (y-x)&(1<<31) RAS
+  */
+  
+  // 
+  int signmask = 1<<31;
+  int xsign = x&signmask;
+  int ysign = y&signmask;
+  
+  // if x positive and y negative -> OK : ~xsign&ysign, OK
+  // if x negative and y positive xsign&~ysign), NOT OK
+  
+  return !!((
+  	((y + (~x + 1)) & (1<<31)) |
+  	(~xsign&ysign)
+  )&~(xsign&~ysign));
+ 
 }
 /* 
  * absVal - absolute value of x
@@ -279,5 +402,8 @@ int isGreater(int x, int y) {
  *   Rating: 4
  */
 int absVal(int x) {
-  return 2;
+  int sign = 1<<31;
+  int xispos = !(sign&x); // 0 or 1
+  int mask = xispos + ~0;
+  return (x^mask)+(!xispos);
 }
