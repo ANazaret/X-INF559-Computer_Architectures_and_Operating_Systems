@@ -1,0 +1,17 @@
+# Achille achille.nazaret
+
+mrmovq x, %rax
+irmovq $5, %rbx
+subq %rbx, %rax
+jg CondTrue
+mrmovq x, %rax
+jmp CondEnd
+
+CondTrue:
+mrmovq x, %rax
+irmovq $1, %rbx
+addq %rbx, %rax
+
+CondEnd :
+rmmovq %rax, y
+halt

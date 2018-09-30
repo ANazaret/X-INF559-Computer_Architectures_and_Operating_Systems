@@ -1,0 +1,46 @@
+ # Achille achille.nazaret
+ 
+ irmovq $1, %r9    #Load 1 for the incrementation
+ irmovq $8, %r10    #Load 8 for the incrementation
+ irmovq $0, %rbx   #Init offset
+ irmovq $0, %rdx   #Init res
+ mrmovq len, %rax   #Load len
+ 
+ # Worst thing ever ... don't know how to load value 
+ # of %rax into the comparison valE
+ # (here %rdx is known to be 0)
+ addq %rdx, %rax
+ # ....................
+ Loop:
+ 
+ jle EndLoop 
+ mrmovq src(%rbx), %rsi  # Load val in rsi
+ rmmovq %rsi, dest(%rbx) # Copy it to dest
+ addq %r10, %rbx
+ xorq %rsi, %rdx
+ subq %r9, %rax
+ jmp Loop
+ 
+ EndLoop:
+ halt
+ 
+ 
+ 
+ .align 8
+# Source block
+src:
+        .quad 0x00a
+        .quad 0x0b0
+        .quad 0xc00
+
+# Destination block
+dest:
+        .quad 0x111
+        .quad 0x222
+        .quad 0x333
+
+# Length
+len:
+        .quad 0x3
+ 
+ 

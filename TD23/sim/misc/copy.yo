@@ -1,0 +1,46 @@
+                            |  # Achille achille.nazaret
+                            |  
+0x000: 30f90100000000000000 |  irmovq $1, %r9    #Load 1 for the incrementation
+0x00a: 30fa0800000000000000 |  irmovq $8, %r10    #Load 8 for the incrementation
+0x014: 30f30000000000000000 |  irmovq $0, %rbx   #Init offset
+0x01e: 30f20000000000000000 |  irmovq $0, %rdx   #Init res
+0x028: 500f9800000000000000 |  mrmovq len, %rax   #Load len
+                            |  
+                            |  # Worst thing ever ... don't know how to load value 
+                            |  # of %rax into the comparison valE
+                            |  # (here %rdx is known to be 0)
+0x032: 6020                 |  addq %rdx, %rax
+                            |  # ....................
+0x034:                      |  Loop:
+                            |  
+0x034: 716000000000000000   |  jle EndLoop 
+0x03d: 50636800000000000000 |  mrmovq src(%rbx), %rsi  # Load val in rsi
+0x047: 40638000000000000000 |  rmmovq %rsi, dest(%rbx) # Copy it to dest
+0x051: 60a3                 |  addq %r10, %rbx
+0x053: 6362                 |  xorq %rsi, %rdx
+0x055: 6190                 |  subq %r9, %rax
+0x057: 703400000000000000   |  jmp Loop
+                            |  
+0x060:                      |  EndLoop:
+0x060: 00                   |  halt
+                            |  
+                            |  
+                            |  
+0x068:                      |  .align 8
+                            | # Source block
+0x068:                      | src:
+0x068: 0a00000000000000     |         .quad 0x00a
+0x070: b000000000000000     |         .quad 0x0b0
+0x078: 000c000000000000     |         .quad 0xc00
+                            | 
+                            | # Destination block
+0x080:                      | dest:
+0x080: 1101000000000000     |         .quad 0x111
+0x088: 2202000000000000     |         .quad 0x222
+0x090: 3303000000000000     |         .quad 0x333
+                            | 
+                            | # Length
+0x098:                      | len:
+0x098: 0300000000000000     |         .quad 0x3
+                            |  
+                            |  

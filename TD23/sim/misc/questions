@@ -1,0 +1,5 @@
+- What is .pos 256 and .quad
+
+- Different usages of rax, rbx ?? Conventions ?
+
+- When is valE sets (for conditionnal jmp)
