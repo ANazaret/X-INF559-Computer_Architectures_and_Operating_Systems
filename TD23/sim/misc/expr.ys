@@ -1,17 +1,21 @@
-# Achille achille.nazaret
+# Achille Nazaret - achille.nazaret
 
-mrmovq x, %rax
-irmovq $5, %rbx
-subq %rbx, %rax
-jg CondTrue
-mrmovq x, %rax
-jmp CondEnd
+  mrmovq x, %rax
+  irmovq $5, %rbx
+  subq %rbx, %rax
+  jg CondTrue
+  mrmovq x, %rax
+  jmp CondEnd
 
 CondTrue:
-mrmovq x, %rax
-irmovq $1, %rbx
-addq %rbx, %rax
+  mrmovq x, %rax
+  irmovq $1, %rbx
+  addq %rbx, %rax
 
 CondEnd :
-rmmovq %rax, y
-halt
+  rmmovq %rax, y
+  halt
+
+.pos 256
+x: .quad 0x0c
+y: .quad 0x00

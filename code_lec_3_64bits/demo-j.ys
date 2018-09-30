@@ -1,0 +1,10 @@
+   xorq %rax, %rax
+   jne t
+   irmovq $1, %rdx
+   nop
+   nop
+   nop
+   halt
+t: irmovq $3, %rdx
+   irmovq $4, %rcx
+   irmovq $5, %rdx

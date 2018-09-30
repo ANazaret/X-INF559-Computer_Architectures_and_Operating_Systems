@@ -1,0 +1,6 @@
+irmovq $1, %rax
+irmovq $2, %rbx
+irmovq $3, %rcx
+irmovq $4, %rdx
+halt
+

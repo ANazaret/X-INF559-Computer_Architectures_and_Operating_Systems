@@ -1,5 +1,7 @@
 irmovq $2, %rax
+pushl %rax
 irmovq $3, %rax
+popl %rax
 rmmovq %rax, 0x0
 jg G
 halt

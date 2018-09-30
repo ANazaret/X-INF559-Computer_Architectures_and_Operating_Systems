@@ -1,4 +1,4 @@
- # Achille achille.nazaret
+ # Achille Nazaret - achille.nazaret
  
  irmovq $1, %r9    #Load 1 for the incrementation
  irmovq $8, %r10    #Load 8 for the incrementation
@@ -6,10 +6,10 @@
  irmovq $0, %rdx   #Init res
  mrmovq len, %rax   #Load len
  
- # Worst thing ever ... don't know how to load value 
+ # Don't know how to load value 
  # of %rax into the comparison valE
- # (here %rdx is known to be 0)
- addq %rdx, %rax
+ # This trick works!
+ andq %rax, %rax
  # ....................
  Loop:
  

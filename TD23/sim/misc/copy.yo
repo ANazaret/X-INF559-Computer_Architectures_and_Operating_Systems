@@ -1,4 +1,4 @@
-                            |  # Achille achille.nazaret
+                            |  # Achille Nazaret - achille.nazaret
                             |  
 0x000: 30f90100000000000000 |  irmovq $1, %r9    #Load 1 for the incrementation
 0x00a: 30fa0800000000000000 |  irmovq $8, %r10    #Load 8 for the incrementation
@@ -6,10 +6,10 @@
 0x01e: 30f20000000000000000 |  irmovq $0, %rdx   #Init res
 0x028: 500f9800000000000000 |  mrmovq len, %rax   #Load len
                             |  
-                            |  # Worst thing ever ... don't know how to load value 
+                            |  # Don't know how to load value 
                             |  # of %rax into the comparison valE
-                            |  # (here %rdx is known to be 0)
-0x032: 6020                 |  addq %rdx, %rax
+                            |  # This trick works!
+0x032: 6200                 |  andq %rax, %rax
                             |  # ....................
 0x034:                      |  Loop:
                             |  
