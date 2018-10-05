@@ -6,7 +6,7 @@
 # Include your name and ID here.
 #
 # Describe how and why you modified the baseline code.
-#  FOR NOW  HAVE REMOVED RAX=0
+#
 ##################################################################
 # Do not modify this portion
 # Function prologue.
@@ -16,7 +16,7 @@ ncopy:
 ##################################################################
 # You can modify this portion
 	# Loop header
-#	xorq %rax,%rax		# count = 0;
+	xorq %rax,%rax		# count = 0;
 	iaddq $-3,%rdx		# len < 0?
 	jg Loop4		# if so, goto Done:
 	jmp Last
@@ -32,104 +32,33 @@ Loop4: #We know that we have at least 4 more addresses to read
 	rmmovq %r13, 24(%rsi)	# ...and store it to dst
 	iaddq $32, %rsi		# dst++
 	iaddq $32, %rdi		# src++
-	andq %r10, %r10		# val > 0?
-	jg Pos11
-Pos01:
-	andq %r11, %r11		# val > 0?
-	jg Pos12				
-Pos02:
-	andq %r12, %r12		# val > 0?
-	jg Pos13
-Pos03:
-	andq %r13, %r13		# val > 0?
-	jg Pos14
-Pos04:
-	iaddq $-4, %rdx		# len--
-	jg Loop4			# if so, goto Loop:		
-	jmp Last		
-
-Pos11:
-	andq %r11, %r11		# val > 0?
-	jg Pos22	
-Pos12:
-	andq %r12, %r12		# val > 0?
-	jg Pos23
-	andq %r13, %r13		# val > 0?
-	jg Pos24
+	andq %r10, %r10		# val <= 0?
+	jle Npos1		# if so, goto Npos:
 	iaddq $1, %rax		# count++
-	iaddq $-4, %rdx		# len--
-	jg Loop4			# if so, goto Loop:	
-	jmp Last
-	
-
-Pos22:
-	andq %r12, %r12		# val > 0?
-	jg Pos33
-	andq %r13, %r13		# val > 0?
-	jg Pos34
-	iaddq $2, %rax		# count++
-	iaddq $-4, %rdx		# len--
-	jg Loop4			# if so, goto Loop:	
-	jmp Last
-
-Pos33:
-	andq %r13, %r13		# val > 0?
-	jg Pos44
-	iaddq $3, %rax		# count++
-	iaddq $-4, %rdx		# len--
-	jg Loop4			# if so, goto Loop:	
-	jmp Last
-
-Pos23:
-	andq %r13, %r13		# val > 0?
-	jg Pos34
-	iaddq $2, %rax		# count++
-	iaddq $-4, %rdx		# len--
-	jg Loop4			# if so, goto Loop:	
-	jmp Last
-
-Pos13:
-	andq %r13, %r13		# val > 0?
-	jg Pos24
+Npos1:
+	andq %r11, %r11		# val <= 0?
+	jle Npos2		# if so, goto Npos:
 	iaddq $1, %rax		# count++
-	iaddq $-4, %rdx		# len--
-	jg Loop4			# if so, goto Loop:	
-	jmp Last
-		
-Pos44:
-	iaddq $4, %rax		# count++
-	iaddq $-4, %rdx		# len--
-	jg Loop4			# if so, goto Loop:	
-	jmp Last
-	
-Pos24:
-	iaddq $2, %rax		# count++
-	iaddq $-4, %rdx		# len--
-	jg Loop4			# if so, goto Loop:	
-	jmp Last
-	
-Pos34:
-	iaddq $3, %rax		# count++
-	iaddq $-4, %rdx		# len--
-	jg Loop4			# if so, goto Loop:	
-	jmp Last
-	
-Pos14:
+Npos2:
+	andq %r12, %r12		# val <= 0?
+	jle Npos3		# if so, goto Npos:
 	iaddq $1, %rax		# count++
+Npos3:
+	andq %r13, %r13		# val <= 0?
+	jle Npos4		# if so, goto Npos:
+	iaddq $1, %rax		# count++
+Npos4:	
 	iaddq $-4, %rdx		# len--
-	jg Loop4			# if so, goto Loop:	
-	jmp Last
-		
+	jg Loop4			# if so, goto Loop:
+	
 Last: #We have len-3 <= 0 ie len<=3 : 0, 1, 2 or 3 cells to copy
 	# rdx is -3, -2, -1 or 0  (mean len is 0,1,2 or 3) BINARY SEARCH
 	iaddq $2, %rdx 	#rdx is now -1,0 ,1,2
 	jle BS_neg
-	
 BS_pos:	
 	#Here rax is 1 or 2 (meaning len 2 or 3)
 	iaddq $-1, %rdx 	#rdx is now 0 ,1 (len 2 or 3) 
 	jg BS_3
-	
 BS_2:
 	# Do 2 copies
 	mrmovq (%rdi), %r10		# read val from src...
@@ -166,6 +95,8 @@ NPos3_2:
 	iaddq $1, %rax		# count++
 	jmp Done
 
+
+
 BS_1:
 	#Do 1 copie
 	mrmovq (%rdi), %r10	# read val from src...
@@ -173,17 +104,17 @@ BS_1:
 	rmmovq %r10, (%rsi)	# ...and store it to dst
 #	iaddq $8, %rsi		# dst++
 	andq %r10, %r10		# val <= 0?
-	jg BS_1_ADD
-	jmp Done
-
-BS_1_ADD:
+	jle Done
 	iaddq $1, %rax		# count++
 	jmp Done
 
 BS_neg:
 	#Here rdx is -1 or 0 (meaning len 0 or 1)
-#	andq %rdx, %rdx #No need, still in CC
+#	andq %rdx, %rdx #No need, still in register
 	jge BS_1 # len 0
+
+
+	
 		
 
 ##################################################################

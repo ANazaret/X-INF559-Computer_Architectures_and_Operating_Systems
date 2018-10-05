@@ -1,0 +1,3 @@
+xorq %rax, %rax
+iaddq $1, %rax
+iaddq $3, %rax
