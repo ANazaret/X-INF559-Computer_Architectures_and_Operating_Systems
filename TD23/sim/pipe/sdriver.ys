@@ -16,10 +16,24 @@ StartFun:
 # ncopy.ys - Copy a src block of len words to dst.
 # Return the number of positive words (>0) contained in src.
 #
-# Include your name and ID here.
+# Achille Nazaret - achille.nazaret
 #
-# Describe how and why you modified the baseline code.
+# I removed first all the useless variable affections to compute sums, 
+# also implemented iaddq
+# I tried to unroll the main loop into 4 mem access at a time 
+# in order to avoid bubbles (reading and writing back the bytes)
+# 
+# I had to deal with the base cases with len=3,2,1 or 0, that i tried
+# to determine using binary search (I was able this way to take advantage
+# of the two conditions jle and jl to discrimate multiple cases in only two cycles)
+#  
+# Finally I removed consecutive %rax +1 when doing the unroll loops (4 by for)
+# doing a hardcoded +x (+4,+1,+2,+3) given the different cases
 #
+# I've been careful to take advantage of the prediction of conditionnal jumps
+# when the jump is the same most of the time 
+#
+#  HAVE REMOVED init RAX=0 SINCE all the test were successful with that
 ##################################################################
 # Do not modify this portion
 # Function prologue.
@@ -29,21 +43,179 @@ ncopy:
 ##################################################################
 # You can modify this portion
 	# Loop header
-	xorq %rax,%rax		# count = 0;
-	andq %rdx,%rdx		# len <= 0?
-	jle Done		# if so, goto Done:
+#	xorq %rax,%rax		# count = 0;
+	iaddq $-3,%rdx		# len < 0?
+	jg Loop4		# if so, goto Done:
+	jmp Last
 
-Loop:	mrmovq (%rdi), %r10	# read val from src...
+Loop4: #We know that we have at least 4 more addresses to read
+	iaddq $32, %rsi		# dst++
+	mrmovq (%rdi), %r10	# read val from src...
+ 	mrmovq 8(%rdi), %r11	# read val from src...
+ 	mrmovq 16(%rdi), %r12	# read val from src...
+ 	mrmovq 24(%rdi), %r13	# read val from src...
+	iaddq $32, %rdi		# src++
+	rmmovq %r10, -32(%rsi)	# ...and store it to dst
+	andq %r10, %r10		# We load now the value to CC even if I dont think it has any impact
+	rmmovq %r11, -24(%rsi)	# ...and store it to dst
+	rmmovq %r12, -16(%rsi)	# ...and store it to dst
+	rmmovq %r13, -8(%rsi)	# ...and store it to dst
+#
+#  I call PosXY the state where Y (among the four) memcells 
+#  are already tested and X are positives
+#
+	jg Pos11
+Pos01:
+	andq %r11, %r11		# val > 0?
+	jg Pos12				
+Pos02:
+	andq %r12, %r12		# val > 0?
+	jg Pos13
+Pos03:
+	andq %r13, %r13		# val > 0?
+	jg Pos14
+Pos04:
+	iaddq $-4, %rdx		# len--
+	jg Loop4			# if so, goto Loop:		
+	jmp Last		
+
+Pos11:
+	andq %r11, %r11		# val > 0?
+	jg Pos22	
+Pos12:
+	andq %r12, %r12		# val > 0?
+	jg Pos23
+	andq %r13, %r13		# val > 0?
+	jg Pos24
 	iaddq $1, %rax		# count++
+	iaddq $-4, %rdx		# len--
+	jg Loop4			# if so, goto Loop:	
+	jmp Last
+	
+Pos22:
+	andq %r12, %r12		# val > 0?
+	jg Pos33
+	andq %r13, %r13		# val > 0?
+	jg Pos34
+	iaddq $2, %rax		# count++
+	iaddq $-4, %rdx		# len--
+	jg Loop4			# if so, goto Loop:	
+	jmp Last
+
+Pos33:
+	andq %r13, %r13		# val > 0?
+	jg Pos44
+	iaddq $3, %rax		# count++
+	iaddq $-4, %rdx		# len--
+	jg Loop4			# if so, goto Loop:	
+	jmp Last
+
+Pos23:
+	andq %r13, %r13		# val > 0?
+	jg Pos34
+	iaddq $2, %rax		# count++
+	iaddq $-4, %rdx		# len--
+	jg Loop4			# if so, goto Loop:	
+	jmp Last
+
+Pos13:
+	andq %r13, %r13		# val > 0?
+	jg Pos24
+	iaddq $1, %rax		# count++
+	iaddq $-4, %rdx		# len--
+	jg Loop4			# if so, goto Loop:	
+	jmp Last
+		
+Pos44:
+	iaddq $4, %rax		# count++
+	iaddq $-4, %rdx		# len--
+	jg Loop4			# if so, goto Loop:	
+	jmp Last
+	
+Pos24:
+	iaddq $2, %rax		# count++
+	iaddq $-4, %rdx		# len--
+	jg Loop4			# if so, goto Loop:	
+	jmp Last
+	
+Pos34:
+	iaddq $3, %rax		# count++
+	iaddq $-4, %rdx		# len--
+	jg Loop4			# if so, goto Loop:	
+	jmp Last
+	
+Pos14:
+	iaddq $1, %rax		# count++
+	iaddq $-4, %rdx		# len--
+	jg Loop4			# if so, goto Loop:	
+	jmp Last
+		
+Last: #We have len-3 <= 0 ie len<=3 : 0, 1, 2 or 3 cells to copy
+	# rdx is -3, -2, -1 or 0  (mean len is 0,1,2 or 3) BINARY SEARCH
+	iaddq $2, %rdx 	#rdx is now -1,0 ,1,2
+	jle BS_neg
+	
+BS_pos:	
+	#Here rax is 1 or 2 (meaning len 2 or 3)
+	iaddq $-1, %rdx 	#rdx is now 0 ,1 (len 2 or 3) 
+	jg BS_3
+	
+BS_2:
+	# Do 2 copies
+	mrmovq (%rdi), %r10		# read val from src...
+	mrmovq 8(%rdi), %r11	# read val from src...
 	rmmovq %r10, (%rsi)	# ...and store it to dst
+	rmmovq %r11, 8(%rsi)	# ...and store it to dst
 	andq %r10, %r10		# val <= 0?
-	jle Npos		# if so, goto Npos:
-Npos:
-	iaddq $-1, %rdx		# len--
-	iaddq $8, %rdi		# src++
-	iaddq $8, %rsi		# dst++
-	andq %rdx,%rdx		# len > 0?
-	jg Loop			# if so, goto Loop:
+	jle NPos2_1		# if so, goto Npos:
+	iaddq $1, %rax		# count++
+NPos2_1:
+	andq %r11, %r11		# val <= 0?
+	jle Done		# if so, finish:
+	iaddq $1, %rax		# count++
+	jmp Done
+	
+BS_3:
+	#Do 3 copies
+	mrmovq (%rdi), %r10		# read val from src...
+	mrmovq 8(%rdi), %r11	# read val from src...
+	mrmovq 16(%rdi), %r12	# read val from src...
+	rmmovq %r10, (%rsi)	# ...and store it to dst
+	rmmovq %r11, 8(%rsi)	# ...and store it to dst
+	rmmovq %r12, 16(%rsi)	# ...and store it to dst
+	andq %r10, %r10		# val <= 0?
+	jle NPos3_1		# if so, goto Npos:
+	iaddq $1, %rax		# count++
+NPos3_1:
+	andq %r11, %r11		# val <= 0?
+	jle NPos3_2		# if so, goto Npos:
+	iaddq $1, %rax		# count++
+NPos3_2:
+	andq %r12, %r12		# val <= 0?
+	jle Done		# if so, finish:
+	iaddq $1, %rax		# count++
+	jmp Done
+
+BS_1:
+	#Do 1 copie
+	mrmovq (%rdi), %r10	# read val from src...
+#	iaddq $8, %rdi		# src++
+	rmmovq %r10, (%rsi)	# ...and store it to dst
+#	iaddq $8, %rsi		# dst++
+	andq %r10, %r10		# val <= 0?
+	jg BS_1_ADD
+	jmp Done
+
+BS_1_ADD:
+	iaddq $1, %rax		# count++
+	jmp Done
+
+BS_neg:
+	#Here rdx is -1 or 0 (meaning len 0 or 1)
+#	andq %rdx, %rdx #No need, still in CC
+	jge BS_1 # len 0
+		
+
 ##################################################################
 # Do not modify the following section of code
 # Function epilogue.
@@ -60,10 +232,10 @@ EndFun:
 ###############################
 	.align 8
 src:
-	.quad 1
-	.quad 2
-	.quad -3
-	.quad -4
+	.quad -1
+	.quad -2
+	.quad 3
+	.quad 4
 	.quad 0xbcdefa # This shouldn't get moved
 
 	.align 16

@@ -3,10 +3,24 @@
                             | # ncopy.ys - Copy a src block of len words to dst.
                             | # Return the number of positive words (>0) contained in src.
                             | #
-                            | # Include your name and ID here.
+                            | # Achille Nazaret - achille.nazaret
                             | #
-                            | # Describe how and why you modified the baseline code.
+                            | # I removed first all the useless variable affections to compute sums, 
+                            | # also implemented iaddq
+                            | # I tried to unroll the main loop into 4 mem access at a time 
+                            | # in order to avoid bubbles (reading and writing back the bytes)
+                            | # 
+                            | # I had to deal with the base cases with len=3,2,1 or 0, that i tried
+                            | # to determine using binary search (I was able this way to take advantage
+                            | # of the two conditions jle and jl to discrimate multiple cases in only two cycles)
+                            | #  
+                            | # Finally I removed consecutive %rax +1 when doing the unroll loops (4 by for)
+                            | # doing a hardcoded +x (+4,+1,+2,+3) given the different cases
                             | #
+                            | # I've been careful to take advantage of the prediction of conditionnal jumps
+                            | # when the jump is the same most of the time 
+                            | #
+                            | #  HAVE REMOVED init RAX=0 SINCE all the test were successful with that
                             | ##################################################################
                             | # Do not modify this portion
                             | # Function prologue.
@@ -16,177 +30,178 @@
                             | ##################################################################
                             | # You can modify this portion
                             | 	# Loop header
-0x000: 6300                 | 	xorq %rax,%rax		# count = 0;
-0x002: c0f2fdffffffffffffff | 	iaddq $-3,%rdx		# len < 0?
-0x00c: 761e00000000000000   | 	jg Loop4		# if so, goto Done:
-0x015: 707802000000000000   | 	jmp Last
+                            | #	xorq %rax,%rax		# count = 0;
+0x000: c0f2fbffffffffffffff | 	iaddq $-5,%rdx		# len < 0?
+0x00a: 761c00000000000000   | 	jg Loop6		# if so, goto Done:
+0x013: 706e02000000000000   | 	jmp Last
                             | 
-0x01e:                      | Loop4: #We know that we have at least 4 more addresses to read
-0x01e: 50a70000000000000000 | 	mrmovq (%rdi), %r10	# read val from src...
-0x028: 50b70800000000000000 |  	mrmovq 8(%rdi), %r11	# read val from src...
-0x032: 50c71000000000000000 |  	mrmovq 16(%rdi), %r12	# read val from src...
-0x03c: 50d71800000000000000 |  	mrmovq 24(%rdi), %r13	# read val from src...
-0x046: 40a60000000000000000 | 	rmmovq %r10, (%rsi)	# ...and store it to dst
-0x050: 40b60800000000000000 | 	rmmovq %r11, 8(%rsi)	# ...and store it to dst
-0x05a: 40c61000000000000000 | 	rmmovq %r12, 16(%rsi)	# ...and store it to dst
-0x064: 40d61800000000000000 | 	rmmovq %r13, 24(%rsi)	# ...and store it to dst
-0x06e: c0f62000000000000000 | 	iaddq $32, %rsi		# dst++
-0x078: c0f72000000000000000 | 	iaddq $32, %rdi		# src++
-0x082: 62aa                 | 	andq %r10, %r10		# val > 0?
-0x084: 76ca00000000000000   | 	jg Pos11
-0x08d:                      | Pos01:
-0x08d: 62bb                 | 	andq %r11, %r11		# val > 0?
-0x08f: 76d500000000000000   | 	jg Pos12				
-0x098:                      | Pos02:
-0x098: 62cc                 | 	andq %r12, %r12		# val > 0?
-0x09a: 76af01000000000000   | 	jg Pos13
-0x0a3:                      | Pos03:
-0x0a3: 62dd                 | 	andq %r13, %r13		# val > 0?
-0x0a5: 765202000000000000   | 	jg Pos14
-0x0ae:                      | Pos04:
-0x0ae: c0f2fcffffffffffffff | 	iaddq $-4, %rdx		# len--
-0x0b8: 761e00000000000000   | 	jg Loop4			# if so, goto Loop:		
-0x0c1: 707802000000000000   | 	jmp Last		
+0x01c:                      | Loop6: #We know that we have at least 4 more addresses to read
+0x01c: 50a70000000000000000 | 	mrmovq (%rdi), %r10	# read val from src...
+0x026: 50b70800000000000000 |  	mrmovq 8(%rdi), %r11	# read val from src...
+0x030: 50c71000000000000000 |  	mrmovq 16(%rdi), %r12	# read val from src...
+0x03a: 50d71800000000000000 |  	mrmovq 24(%rdi), %r13	# read val from src...
+0x044: 50872000000000000000 |  	mrmovq 32(%rdi), %r8	# read val from src...
+0x04e: 50972800000000000000 |  	mrmovq 40(%rdi), %r9	# read val from src...
+0x058: 40a60000000000000000 | 	rmmovq %r10, (%rsi)	# ...and store it to dst
+0x062: 40b60800000000000000 | 	rmmovq %r11, 8(%rsi)	# ...and store it to dst
+0x06c: 40c61000000000000000 | 	rmmovq %r12, 16(%rsi)	# ...and store it to dst
+0x076: 40d61800000000000000 | 	rmmovq %r13, 24(%rsi)	# ...and store it to dst
+0x080: 40862000000000000000 | 	rmmovq %r8, 32(%rsi)	# ...and store it to dst
+0x08a: 40962800000000000000 | 	rmmovq %r9, 40(%rsi)	# ...and store it to dst
                             | 
-0x0ca:                      | Pos11:
-0x0ca: 62bb                 | 	andq %r11, %r11		# val > 0?
-0x0cc: 761101000000000000   | 	jg Pos22	
-0x0d5:                      | Pos12:
-0x0d5: 62cc                 | 	andq %r12, %r12		# val > 0?
-0x0d7: 767e01000000000000   | 	jg Pos23
-0x0e0: 62dd                 | 	andq %r13, %r13		# val > 0?
-0x0e2: 760602000000000000   | 	jg Pos24
-0x0eb: c0f00100000000000000 | 	iaddq $1, %rax		# count++
-0x0f5: c0f2fcffffffffffffff | 	iaddq $-4, %rdx		# len--
-0x0ff: 761e00000000000000   | 	jg Loop4			# if so, goto Loop:	
-0x108: 707802000000000000   | 	jmp Last
+0x094: c0f73000000000000000 | 	iaddq $48, %rdi		# src++
+0x09e: c0f63000000000000000 | 	iaddq $48, %rsi		# dst++
                             | 	
+                            | 	
+0x0a8: 6288                 | 	andq %r8, %r8		# val > 0?
+0x0aa: 71bd00000000000000   | 	jle PosR8
+0x0b3: c0f00100000000000000 | 	iaddq $1, %rax
+0x0bd:                      | PosR8:
+0x0bd: 6299                 | 	andq %r9, %r9		# val > 0?
+0x0bf: 71d200000000000000   | 	jle PosR9
+0x0c8: c0f00100000000000000 | 	iaddq $1, %rax
+0x0d2:                      | PosR9:	
+                            | 	
+0x0d2: 62aa                 | 	andq %r10, %r10		
+                            | #
+                            | #  I call PosXY the state where Y (among the six) memcells 
+                            | #  are already tested and X are positives
+                            | #
+0x0d4: 761101000000000000   | 	jg Pos11
+0x0dd:                      | Pos01:
+0x0dd: 62bb                 | 	andq %r11, %r11		# val > 0?
+0x0df: 761c01000000000000   | 	jg Pos12				
+0x0e8:                      | Pos02:
+0x0e8: 62cc                 | 	andq %r12, %r12		# val > 0?
+0x0ea: 76d201000000000000   | 	jg Pos13
+0x0f3:                      | Pos03:
+0x0f3: 62dd                 | 	andq %r13, %r13		# val > 0?
+0x0f5: 765102000000000000   | 	jg Pos14
+0x0fe:                      | Pos04:
+0x0fe: c0f2faffffffffffffff | 	iaddq $-6, %rdx		# len--
+0x108: 761c00000000000000   | 	jg Loop6			# if so, goto Loop:		
                             | 
-0x111:                      | Pos22:
-0x111: 62cc                 | 	andq %r12, %r12		# val > 0?
-0x113: 764d01000000000000   | 	jg Pos33
-0x11c: 62dd                 | 	andq %r13, %r13		# val > 0?
-0x11e: 762c02000000000000   | 	jg Pos34
-0x127: c0f00200000000000000 | 	iaddq $2, %rax		# count++
-0x131: c0f2fcffffffffffffff | 	iaddq $-4, %rdx		# len--
-0x13b: 761e00000000000000   | 	jg Loop4			# if so, goto Loop:	
-0x144: 707802000000000000   | 	jmp Last
+0x111:                      | Pos11:
+0x111: 62bb                 | 	andq %r11, %r11		# val > 0?
+0x113: 764f01000000000000   | 	jg Pos22	
+0x11c:                      | Pos12:
+0x11c: 62cc                 | 	andq %r12, %r12		# val > 0?
+0x11e: 76aa01000000000000   | 	jg Pos23
+0x127: 62dd                 | 	andq %r13, %r13		# val > 0?
+0x129: 761702000000000000   | 	jg Pos24
+0x132: c0f00100000000000000 | 	iaddq $1, %rax		# count++
+0x13c: c0f2faffffffffffffff | 	iaddq $-6, %rdx		# len--
+0x146: 761c00000000000000   | 	jg Loop6			# if so, goto Loop:	
+                            | 	
+0x14f:                      | Pos22:
+0x14f: 62cc                 | 	andq %r12, %r12		# val > 0?
+0x151: 768201000000000000   | 	jg Pos33
+0x15a: 62dd                 | 	andq %r13, %r13		# val > 0?
+0x15c: 763402000000000000   | 	jg Pos34
+0x165: c0f00200000000000000 | 	iaddq $2, %rax		# count++
+0x16f: c0f2faffffffffffffff | 	iaddq $-6, %rdx		# len--
+0x179: 761c00000000000000   | 	jg Loop6			# if so, goto Loop:	
                             | 
-0x14d:                      | Pos33:
-0x14d: 62dd                 | 	andq %r13, %r13		# val > 0?
-0x14f: 76e001000000000000   | 	jg Pos44
-0x158: c0f00300000000000000 | 	iaddq $3, %rax		# count++
-0x162: c0f2fcffffffffffffff | 	iaddq $-4, %rdx		# len--
-0x16c: 761e00000000000000   | 	jg Loop4			# if so, goto Loop:	
-0x175: 707802000000000000   | 	jmp Last
                             | 
-0x17e:                      | Pos23:
-0x17e: 62dd                 | 	andq %r13, %r13		# val > 0?
-0x180: 762c02000000000000   | 	jg Pos34
-0x189: c0f00200000000000000 | 	iaddq $2, %rax		# count++
-0x193: c0f2fcffffffffffffff | 	iaddq $-4, %rdx		# len--
-0x19d: 761e00000000000000   | 	jg Loop4			# if so, goto Loop:	
-0x1a6: 707802000000000000   | 	jmp Last
+0x182:                      | Pos33:
+0x182: 62dd                 | 	andq %r13, %r13		# val > 0?
+0x184: 76fa01000000000000   | 	jg Pos44
+0x18d: c0f00300000000000000 | 	iaddq $3, %rax		# count++
+0x197: c0f2faffffffffffffff | 	iaddq $-6, %rdx		# len--
+0x1a1: 761c00000000000000   | 	jg Loop6			# if so, goto Loop:	
                             | 
-0x1af:                      | Pos13:
-0x1af: 62dd                 | 	andq %r13, %r13		# val > 0?
-0x1b1: 760602000000000000   | 	jg Pos24
-0x1ba: c0f00100000000000000 | 	iaddq $1, %rax		# count++
-0x1c4: c0f2fcffffffffffffff | 	iaddq $-4, %rdx		# len--
-0x1ce: 761e00000000000000   | 	jg Loop4			# if so, goto Loop:	
-0x1d7: 707802000000000000   | 	jmp Last
+                            | 
+0x1aa:                      | Pos23:
+0x1aa: 62dd                 | 	andq %r13, %r13		# val > 0?
+0x1ac: 763402000000000000   | 	jg Pos34
+0x1b5: c0f00200000000000000 | 	iaddq $2, %rax		# count++
+0x1bf: c0f2faffffffffffffff | 	iaddq $-6, %rdx		# len--
+0x1c9: 761c00000000000000   | 	jg Loop6			# if so, goto Loop:		
+                            | 
+0x1d2:                      | Pos13:
+0x1d2: 62dd                 | 	andq %r13, %r13		# val > 0?
+0x1d4: 761702000000000000   | 	jg Pos24
+0x1dd: c0f00100000000000000 | 	iaddq $1, %rax		# count++
+0x1e7: c0f2faffffffffffffff | 	iaddq $-6, %rdx		# len--
+0x1f1: 761c00000000000000   | 	jg Loop6			# if so, goto Loop:	
                             | 		
-0x1e0:                      | Pos44:
-0x1e0: c0f00400000000000000 | 	iaddq $4, %rax		# count++
-0x1ea: c0f2fcffffffffffffff | 	iaddq $-4, %rdx		# len--
-0x1f4: 761e00000000000000   | 	jg Loop4			# if so, goto Loop:	
-0x1fd: 707802000000000000   | 	jmp Last
+0x1fa:                      | Pos44:
+0x1fa: c0f00400000000000000 | 	iaddq $4, %rax		# count++
+0x204: c0f2faffffffffffffff | 	iaddq $-6, %rdx		# len--
+0x20e: 761c00000000000000   | 	jg Loop6			# if so, goto Loop:	
                             | 	
-0x206:                      | Pos24:
-0x206: c0f00200000000000000 | 	iaddq $2, %rax		# count++
-0x210: c0f2fcffffffffffffff | 	iaddq $-4, %rdx		# len--
-0x21a: 761e00000000000000   | 	jg Loop4			# if so, goto Loop:	
-0x223: 707802000000000000   | 	jmp Last
+0x217:                      | Pos24:
+0x217: c0f00200000000000000 | 	iaddq $2, %rax		# count++
+0x221: c0f2faffffffffffffff | 	iaddq $-6, %rdx		# len--
+0x22b: 761c00000000000000   | 	jg Loop6			# if so, goto Loop:	
                             | 	
-0x22c:                      | Pos34:
-0x22c: c0f00300000000000000 | 	iaddq $3, %rax		# count++
-0x236: c0f2fcffffffffffffff | 	iaddq $-4, %rdx		# len--
-0x240: 761e00000000000000   | 	jg Loop4			# if so, goto Loop:	
-0x249: 707802000000000000   | 	jmp Last
+0x234:                      | Pos34:
+0x234: c0f00300000000000000 | 	iaddq $3, %rax		# count++
+0x23e: c0f2faffffffffffffff | 	iaddq $-6, %rdx		# len--
+0x248: 761c00000000000000   | 	jg Loop6			# if so, goto Loop:	
                             | 	
-0x252:                      | Pos14:
-0x252: c0f00100000000000000 | 	iaddq $1, %rax		# count++
-0x25c: c0f2fcffffffffffffff | 	iaddq $-4, %rdx		# len--
-0x266: 761e00000000000000   | 	jg Loop4			# if so, goto Loop:	
-0x26f: 707802000000000000   | 	jmp Last
+0x251:                      | Pos14:
+0x251: c0f00100000000000000 | 	iaddq $1, %rax		# count++
+0x25b: c0f2faffffffffffffff | 	iaddq $-6, %rdx		# len--
+0x265: 761c00000000000000   | 	jg Loop6			# if so, goto Loop:	
+                            | 	
                             | 		
-0x278:                      | Last: #We have len-3 <= 0 ie len<=3 : 0, 1, 2 or 3 cells to copy
-                            | 	# rdx is -3, -2, -1 or 0  (mean len is 0,1,2 or 3) BINARY SEARCH
-0x278: c0f20200000000000000 | 	iaddq $2, %rdx 	#rdx is now -1,0 ,1,2
-0x282: 71af03000000000000   | 	jle BS_neg
-0x28b:                      | BS_pos:	
-                            | 	#Here rax is 1 or 2 (meaning len 2 or 3)
-0x28b: c0f2ffffffffffffffff | 	iaddq $-1, %rdx 	#rdx is now 0 ,1 (len 2 or 3) 
-0x295: 76f902000000000000   | 	jg BS_3
-0x29e:                      | BS_2:
-                            | 	# Do 2 copies
-0x29e: 50a70000000000000000 | 	mrmovq (%rdi), %r10		# read val from src...
-0x2a8: 50b70800000000000000 | 	mrmovq 8(%rdi), %r11	# read val from src...
-0x2b2: 40a60000000000000000 | 	rmmovq %r10, (%rsi)	# ...and store it to dst
-0x2bc: 40b60800000000000000 | 	rmmovq %r11, 8(%rsi)	# ...and store it to dst
-0x2c6: 62aa                 | 	andq %r10, %r10		# val <= 0?
-0x2c8: 71db02000000000000   | 	jle NPos2_1		# if so, goto Npos:
-0x2d1: c0f00100000000000000 | 	iaddq $1, %rax		# count++
-0x2db:                      | NPos2_1:
-0x2db: 62bb                 | 	andq %r11, %r11		# val <= 0?
-0x2dd: 71b803000000000000   | 	jle Done		# if so, finish:
+0x26e:                      | Last: #We have len-5 <= 0 ie len<=5 : 0, 1, 2, 3, 4 or 5 cells to copy
+0x26e: c0f20400000000000000 | 	iaddq $4, %rdx		# count++
+0x278: 729a03000000000000   | 	jl Done
+                            | 
+0x281:                      | Copy1:
+0x281: 50870000000000000000 | 	mrmovq (%rdi), %r8		# read val from src...
+0x28b: 50970800000000000000 | 	mrmovq 8(%rdi), %r9		# Prepare val for free
+0x295: 50a71000000000000000 | 	mrmovq 16(%rdi), %r10		# 
+0x29f: 40860000000000000000 | 	rmmovq %r8, (%rsi)	# ...and store it to dst
+0x2a9: 6288                 | 	andq %r8, %r8		# val <= 0?
+0x2ab: 71be02000000000000   | 	jle Not1		# if so, goto Not:
+0x2b4: c0f00100000000000000 | 	iaddq $1, %rax		# count++
+0x2be:                      | Not1:
+0x2be: c0f2ffffffffffffffff | 	iaddq $-1, %rdx		
+0x2c8: 729a03000000000000   | 	jl Done
+0x2d1:                      | Copy2:
+0x2d1: 40960800000000000000 | 	rmmovq %r9, 8(%rsi)	# ...and store it to dst
+0x2db: 6299                 | 	andq %r9, %r9		# val <= 0?
+0x2dd: 71f002000000000000   | 	jle Not2		# if so, goto Not:
 0x2e6: c0f00100000000000000 | 	iaddq $1, %rax		# count++
-0x2f0: 70b803000000000000   | 	jmp Done
-                            | 	
-0x2f9:                      | BS_3:
-                            | 	#Do 3 copies
-0x2f9: 50a70000000000000000 | 	mrmovq (%rdi), %r10		# read val from src...
-0x303: 50b70800000000000000 | 	mrmovq 8(%rdi), %r11	# read val from src...
-0x30d: 50c71000000000000000 | 	mrmovq 16(%rdi), %r12	# read val from src...
-0x317: 40a60000000000000000 | 	rmmovq %r10, (%rsi)	# ...and store it to dst
-0x321: 40b60800000000000000 | 	rmmovq %r11, 8(%rsi)	# ...and store it to dst
-0x32b: 40c61000000000000000 | 	rmmovq %r12, 16(%rsi)	# ...and store it to dst
-0x335: 62aa                 | 	andq %r10, %r10		# val <= 0?
-0x337: 714a03000000000000   | 	jle NPos3_1		# if so, goto Npos:
-0x340: c0f00100000000000000 | 	iaddq $1, %rax		# count++
-0x34a:                      | NPos3_1:
-0x34a: 62bb                 | 	andq %r11, %r11		# val <= 0?
-0x34c: 715f03000000000000   | 	jle NPos3_2		# if so, goto Npos:
-0x355: c0f00100000000000000 | 	iaddq $1, %rax		# count++
-0x35f:                      | NPos3_2:
-0x35f: 62cc                 | 	andq %r12, %r12		# val <= 0?
-0x361: 71b803000000000000   | 	jle Done		# if so, finish:
-0x36a: c0f00100000000000000 | 	iaddq $1, %rax		# count++
-0x374: 70b803000000000000   | 	jmp Done
+0x2f0:                      | Not2:
+0x2f0: c0f2ffffffffffffffff | 	iaddq $-1, %rdx		
+0x2fa: 729a03000000000000   | 	jl Done
+0x303:                      | Copy3:
+0x303: 50b71800000000000000 | 	mrmovq 24(%rdi), %r11
+0x30d: 40a61000000000000000 | 	rmmovq %r10, 16(%rsi)
+0x317: 62aa                 | 	andq %r10, %r10		# val <= 0?
+0x319: 712c03000000000000   | 	jle Not3		# if so, goto Not:
+0x322: c0f00100000000000000 | 	iaddq $1, %rax		# count++
+0x32c:                      | Not3:
+0x32c: c0f2ffffffffffffffff | 	iaddq $-1, %rdx		
+0x336: 729a03000000000000   | 	jl Done
+0x33f:                      | Copy4:
+0x33f: 50c72000000000000000 | 	mrmovq 32(%rdi), %r12
+0x349: 40b61800000000000000 | 	rmmovq %r11, 24(%rsi)
+0x353: 62bb                 | 	andq %r11, %r11		# val <= 0?
+0x355: 716803000000000000   | 	jle Not4		# if so, goto Not:
+0x35e: c0f00100000000000000 | 	iaddq $1, %rax		# count++
+0x368:                      | Not4:
+0x368: c0f2ffffffffffffffff | 	iaddq $-1, %rdx		
+0x372: 729a03000000000000   | 	jl Done
+0x37b:                      | Copy5:
+0x37b: 40c62000000000000000 | 	rmmovq %r12, 32(%rsi)
+0x385: 62cc                 | 	andq %r12, %r12		# val <= 0?
+0x387: 719a03000000000000   | 	jle Done		# if so, goto Not:
+0x390: c0f00100000000000000 | 	iaddq $1, %rax		# count++
                             | 
-0x37d:                      | BS_1:
-                            | 	#Do 1 copie
-0x37d: 50a70000000000000000 | 	mrmovq (%rdi), %r10	# read val from src...
-                            | #	iaddq $8, %rdi		# src++
-0x387: 40a60000000000000000 | 	rmmovq %r10, (%rsi)	# ...and store it to dst
-                            | #	iaddq $8, %rsi		# dst++
-0x391: 62aa                 | 	andq %r10, %r10		# val <= 0?
-0x393: 71b803000000000000   | 	jle Done
-0x39c: c0f00100000000000000 | 	iaddq $1, %rax		# count++
-0x3a6: 70b803000000000000   | 	jmp Done
                             | 
-0x3af:                      | BS_neg:
-                            | 	#Here rdx is -1 or 0 (meaning len 0 or 1)
-                            | #	andq %rdx, %rdx #No need, still in register
-0x3af: 757d03000000000000   | 	jge BS_1 # len 0
-                            | 		
+                            | 
                             | 
                             | ##################################################################
                             | # Do not modify the following section of code
                             | # Function epilogue.
-0x3b8:                      | Done:
-0x3b8: 90                   | 	ret
+0x39a:                      | Done:
+0x39a: 90                   | 	ret
                             | ##################################################################
                             | # Keep the following label at the end of your function
-0x3b9:                      | End:
+0x39b:                      | End:
                             | #/* $end ncopy-ys */

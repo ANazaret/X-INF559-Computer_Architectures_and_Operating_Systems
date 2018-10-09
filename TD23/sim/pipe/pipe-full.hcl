@@ -3,7 +3,10 @@
 #    HCL Description of Control for Pipelined Y86-64 Processor     #
 #    Copyright (C) Randal E. Bryant, David R. O'Hallaron, 2014     #
 ####################################################################
-
+##
+## Achille Nazaret - achille.nazaret
+## I added IIADDQ like in partB
+##
 ## Your task is to implement the iaddq instruction
 ## The file contains a declaration of the icodes
 ## for iaddq (IIADDQ)
