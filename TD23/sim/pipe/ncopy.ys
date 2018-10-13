@@ -31,177 +31,105 @@ ncopy:
 # You can modify this portion
 	# Loop header
 #	xorq %rax,%rax		# count = 0;
-	iaddq $-3,%rdx		# len < 0?
-	jg Loop4		# if so, goto Done:
-	jmp Last
+	iaddq $-8,%rdx		# len < 0?
+	jl preLoop2		# if so, goto Done:
 
-Loop4: #We know that we have at least 4 more addresses to read
-	iaddq $32, %rsi		# dst++
+Loop8: #We know that we have at least 8 more addresses to read
+	mrmovq (%rdi), %r8	# read val from src...
+ 	mrmovq 8(%rdi), %r9	# read val from src...
+ 	mrmovq 16(%rdi), %r10	# read val from src...
+ 	mrmovq 24(%rdi), %r11	# read val from src..
+
+	rmmovq %r8, (%rsi)	# ...and store it to dst	
+	andq %r8, %r8		# 
+	rmmovq %r9, 8(%rsi)	# ...and store it to dst
+ 	mrmovq 32(%rdi), %r12	# read val from src..
+	jle Not1		# if so, goto Npos:
+	iaddq $1, %rax		# count++
+Not1:
+	andq %r9, %r9		# 
+	rmmovq %r10, 16(%rsi)	# ...and store it to dst
+ 	mrmovq 40(%rdi), %r8	# read val from src..
+	jle Not2		# if so, goto Npos:
+	iaddq $1, %rax		# count++
+Not2:
+	andq %r10, %r10		# 
+	rmmovq %r11, 24(%rsi)	# ...and store it to dst
+ 	mrmovq 48(%rdi), %r9	# read val from src..
+	jle Not3		# if so, goto Npos:
+	iaddq $1, %rax		# count++
+Not3:
+	andq %r11, %r11		# 
+	rmmovq %r12, 32(%rsi)	# ...and store it to dst
+ 	mrmovq 56(%rdi), %r10	# read val from src..
+	jle Not4		# if so, goto Npos:
+	iaddq $1, %rax		# count++
+Not4:
+	andq %r12, %r12		# 
+	rmmovq %r8, 40(%rsi)	# ...and store it to ds
+	jle Not5		# if so, goto Npos:
+	iaddq $1, %rax		# count++
+Not5:
+	andq %r8, %r8		# 
+	rmmovq %r9, 48(%rsi)	# ...and store it to dst
+	jle Not6		# if so, goto Npos:
+	iaddq $1, %rax		# count++
+Not6:
+	andq %r9, %r9		# 
+	rmmovq %r10, 56(%rsi)	# ...and store it to dst
+	jle Not7		# if so, goto Npos:
+	iaddq $1, %rax		# count++
+Not7:
+	iaddq $64, %rdi		# src++
+	iaddq $64, %rsi		# dst++
+	andq %r10, %r10		# 
+	jle Not8		# if so, goto Npos:
+	iaddq $1, %rax		# count++
+Not8:
+	iaddq $-8, %rdx		# len--
+	jge Loop8			# if so, goto Loop:		
+		
+# -8, ... -1  +2, while >0
+preLoop2:
+	iaddq $6, %rdx		# len-8 back to len-2
+	jl Last			# if so, goto Loop:		
+
+Loop2: #We know that we have 2 more addresses to read
+	
 	mrmovq (%rdi), %r10	# read val from src...
  	mrmovq 8(%rdi), %r11	# read val from src...
- 	mrmovq 16(%rdi), %r12	# read val from src...
- 	mrmovq 24(%rdi), %r13	# read val from src...
-	iaddq $32, %rdi		# src++
-	rmmovq %r10, -32(%rsi)	# ...and store it to dst
+	iaddq $16, %rdi		# src++
+	rmmovq %r10, (%rsi)	# ...and store it to dst
 	andq %r10, %r10		# We load now the value to CC even if I dont think it has any impact
-	rmmovq %r11, -24(%rsi)	# ...and store it to dst
-	rmmovq %r12, -16(%rsi)	# ...and store it to dst
-	rmmovq %r13, -8(%rsi)	# ...and store it to dst
-#
-#  I call PosXY the state where Y (among the four) memcells 
-#  are already tested and X are positives
-#
-	jg Pos11
-Pos01:
-	andq %r11, %r11		# val > 0?
-	jg Pos12				
-Pos02:
-	andq %r12, %r12		# val > 0?
-	jg Pos13
-Pos03:
-	andq %r13, %r13		# val > 0?
-	jg Pos14
-Pos04:
-	iaddq $-4, %rdx		# len--
-	jg Loop4			# if so, goto Loop:		
-	jmp Last		
-
-Pos11:
-	andq %r11, %r11		# val > 0?
-	jg Pos22	
-Pos12:
-	andq %r12, %r12		# val > 0?
-	jg Pos23
-	andq %r13, %r13		# val > 0?
-	jg Pos24
+	rmmovq %r11, 8(%rsi)	# ...and store it to dst
+	iaddq $16, %rsi		# dst++
+	
+	andq %r10, %r10		# 
+	jle Not10		# if so, goto Npos:
 	iaddq $1, %rax		# count++
-	iaddq $-4, %rdx		# len--
-	jg Loop4			# if so, goto Loop:	
-	jmp Last
-	
-Pos22:
-	andq %r12, %r12		# val > 0?
-	jg Pos33
-	andq %r13, %r13		# val > 0?
-	jg Pos34
-	iaddq $2, %rax		# count++
-	iaddq $-4, %rdx		# len--
-	jg Loop4			# if so, goto Loop:	
-	jmp Last
-
-Pos33:
-	andq %r13, %r13		# val > 0?
-	jg Pos44
-	iaddq $3, %rax		# count++
-	iaddq $-4, %rdx		# len--
-	jg Loop4			# if so, goto Loop:	
-	jmp Last
-
-Pos23:
-	andq %r13, %r13		# val > 0?
-	jg Pos34
-	iaddq $2, %rax		# count++
-	iaddq $-4, %rdx		# len--
-	jg Loop4			# if so, goto Loop:	
-	jmp Last
-
-Pos13:
-	andq %r13, %r13		# val > 0?
-	jg Pos24
+Not10:
+	andq %r11, %r11		# 
+	jle Not11		# if so, goto Npos:
 	iaddq $1, %rax		# count++
-	iaddq $-4, %rdx		# len--
-	jg Loop4			# if so, goto Loop:	
-	jmp Last
-		
-Pos44:
-	iaddq $4, %rax		# count++
-	iaddq $-4, %rdx		# len--
-	jg Loop4			# if so, goto Loop:	
-	jmp Last
-	
-Pos24:
-	iaddq $2, %rax		# count++
-	iaddq $-4, %rdx		# len--
-	jg Loop4			# if so, goto Loop:	
-	jmp Last
-	
-Pos34:
-	iaddq $3, %rax		# count++
-	iaddq $-4, %rdx		# len--
-	jg Loop4			# if so, goto Loop:	
-	jmp Last
-	
-Pos14:
-	iaddq $1, %rax		# count++
-	iaddq $-4, %rdx		# len--
-	jg Loop4			# if so, goto Loop:	
-	jmp Last
-		
+Not11:
+	iaddq $-2, %rdx		# len--
+	jge Loop2			# if so, goto Loop:		
+
+
 Last: #We have len-3 <= 0 ie len<=3 : 0, 1, 2 or 3 cells to copy
-	# rdx is -3, -2, -1 or 0  (mean len is 0,1,2 or 3) BINARY SEARCH
-	iaddq $2, %rdx 	#rdx is now -1,0 ,1,2
-	jle BS_neg
-	
-BS_pos:	
-	#Here rax is 1 or 2 (meaning len 2 or 3)
-	iaddq $-1, %rdx 	#rdx is now 0 ,1 (len 2 or 3) 
-	jg BS_3
-	
-BS_2:
-	# Do 2 copies
-	mrmovq (%rdi), %r10		# read val from src...
-	mrmovq 8(%rdi), %r11	# read val from src...
-	rmmovq %r10, (%rsi)	# ...and store it to dst
-	rmmovq %r11, 8(%rsi)	# ...and store it to dst
-	andq %r10, %r10		# val <= 0?
-	jle NPos2_1		# if so, goto Npos:
-	iaddq $1, %rax		# count++
-NPos2_1:
-	andq %r11, %r11		# val <= 0?
-	jle Done		# if so, finish:
-	iaddq $1, %rax		# count++
-	jmp Done
-	
-BS_3:
-	#Do 3 copies
-	mrmovq (%rdi), %r10		# read val from src...
-	mrmovq 8(%rdi), %r11	# read val from src...
-	mrmovq 16(%rdi), %r12	# read val from src...
-	rmmovq %r10, (%rsi)	# ...and store it to dst
-	rmmovq %r11, 8(%rsi)	# ...and store it to dst
-	rmmovq %r12, 16(%rsi)	# ...and store it to dst
-	andq %r10, %r10		# val <= 0?
-	jle NPos3_1		# if so, goto Npos:
-	iaddq $1, %rax		# count++
-NPos3_1:
-	andq %r11, %r11		# val <= 0?
-	jle NPos3_2		# if so, goto Npos:
-	iaddq $1, %rax		# count++
-NPos3_2:
-	andq %r12, %r12		# val <= 0?
-	jle Done		# if so, finish:
-	iaddq $1, %rax		# count++
+	iaddq $2, %rdx 	#rdx is now 0 ,1
+	jg Last1
 	jmp Done
 
-BS_1:
-	#Do 1 copie
+Last1:
 	mrmovq (%rdi), %r10	# read val from src...
-#	iaddq $8, %rdi		# src++
 	rmmovq %r10, (%rsi)	# ...and store it to dst
-#	iaddq $8, %rsi		# dst++
 	andq %r10, %r10		# val <= 0?
 	jg BS_1_ADD
 	jmp Done
 
 BS_1_ADD:
 	iaddq $1, %rax		# count++
-	jmp Done
-
-BS_neg:
-	#Here rdx is -1 or 0 (meaning len 0 or 1)
-#	andq %rdx, %rdx #No need, still in CC
-	jge BS_1 # len 0
-		
 
 ##################################################################
 # Do not modify the following section of code

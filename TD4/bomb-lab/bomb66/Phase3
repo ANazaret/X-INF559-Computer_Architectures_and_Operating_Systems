@@ -1,0 +1,79 @@
+   |0x400f43 <phase_3>      sub    $0x18,%rsp                                            │
+   │0x400f47 <phase_3+4>    lea    0x8(%rsp),%rcx                                        │
+   │0x400f4c <phase_3+9>    lea    0xc(%rsp),%rdx                                        │
+   │0x400f51 <phase_3+14>   mov    $0x4027bd,%esi                                        │
+   │0x400f56 <phase_3+19>   mov    $0x0,%eax                                             │
+   │0x400f5b <phase_3+24>   callq  0x400c10 <__isoc99_sscanf@plt>			 │
+   │0x400f60 <phase_3+29>   cmp    $0x1,%eax                                             │
+   │0x400f63 <phase_3+32>   jg     0x400f6a <phase_3+39>                                 │
+   │0x400f65 <phase_3+34>   callq  0x401564 <explode_bomb>                               │
+   │0x400f6a <phase_3+39>   cmpl   $0x7,0xc(%rsp)              #   0xc(%rsp) is the first int                         │
+   │0x400f6f <phase_3+44>   ja     0x400fad <phase_3+106>                                │
+   │0x400f71 <phase_3+46>   mov    0xc(%rsp),%eax                                        │
+   │0x400f75 <phase_3+50>   jmpq   *0x402520(,%rax,8)                                    │
+   │0x400f7c <phase_3+57>   mov    $0x312,%eax                                           │
+   │0x400f81 <phase_3+62>   jmp    0x400fbe <phase_3+123>                                │
+   │0x400f83 <phase_3+64>   mov    $0x129,%eax                                           │
+   │0x400f88 <phase_3+69>   jmp    0x400fbe <phase_3+123>                                │
+   │0x400f8a <phase_3+71>   mov    $0x3a2,%eax                                           │
+   │0x400f8f <phase_3+76>   jmp    0x400fbe <phase_3+123>                                │
+   │0x400f91 <phase_3+78>   mov    $0x195,%eax                                           │
+   │0x400f96 <phase_3+83>   jmp    0x400fbe <phase_3+123>                                │
+   │0x400f98 <phase_3+85>   mov    $0x154,%eax                                           │
+   │0x400f9d <phase_3+90>   jmp    0x400fbe <phase_3+123>                                │
+   │0x400f9f <phase_3+92>   mov    $0x175,%eax                                           │
+   │0x400fa4 <phase_3+97>   jmp    0x400fbe <phase_3+123>                                │
+   │0x400fa6 <phase_3+99>   mov    $0x3ca,%eax                                           │
+   │0x400fab <phase_3+104>  jmp    0x400fbe <phase_3+123>                                │
+   │0x400fad <phase_3+106>  callq  0x401564 <explode_bomb>                               │
+   │0x400fb2 <phase_3+111>  mov    $0x0,%eax      
+   │0x400fb7 <phase_3+116>  jmp    0x400fbe <phase_3+123>                                │
+   │0x400fb9 <phase_3+118>  mov    $0xe4,%eax                                            │
+   │0x400fbe <phase_3+123>  cmp    0x8(%rsp),%eax                                        │
+   │0x400fc2 <phase_3+127>  je     0x400fc9 <phase_3+134>                                │
+   │0x400fc4 <phase_3+129>  callq  0x401564 <explode_bomb>                               │
+   │0x400fc9 <phase_3+134>  add    $0x18,%rsp                                            │
+   │0x400fcd <phase_3+138>  retq         
+   
+   
+   
+    0x402520                jl     0x402531                                              │
+   │0x402522                add    %al,(%rax)                                            │
+   │0x402525                add    %al,(%rax)                                            │
+   │0x402527                add    %bh,0x400f(%rcx)                                      │
+   │0x40252d                add    %al,(%rax)                                            │
+   │0x40252f                add    %al,0x400f(%rbx)                                      │
+   │0x402535                add    %al,(%rax)                                            │
+   │0x402537                add    %cl,0x400f(%rdx)                                      │
+   │0x40253d                add    %al,(%rax)                                            │
+   │0x40253f                add    %dl,0x400f(%rcx)                                      │
+   │0x402545                add    %al,(%rax)                                            │
+   │0x402547                add    %bl,0x400f(%rax)                                      │
+   │0x40254d                add    %al,(%rax)                                            │
+   │0x40254f                add    %bl,0x400f(%rdi)                                      │
+   │0x402555                add    %al,(%rax)                                            │
+   │0x402557                add    %ah,0x400f(%rsi)                                      │
+   │0x40255d                add    %al,(%rax)                                            │
+   │0x40255f                add    %ch,0x61(%rbp)                                        │
+   │0x402562 <array.3161+2> fs jne 0x4025ce                     
+
+(gdb) print (char *) 0x4027bd
+$30 = 0x4027bd "%d %d"     
+
+
+sscanf return value :
+sscanf returns EOF if end of string (or failure to match) occurs before any values are stored. 
+If values are stored, it returns the number of items stored;     
+
+
+We want two numbers!
+
+It is a switch depending on the first var
+For first = 1, the 2nd must be 228
+
+
+0xc(%rsp) is the first int   
+0x8(%rsp) is the second int
+
+1) Explode if n1 > 7
+2) Explode if n2 != 0xe4 = 228
