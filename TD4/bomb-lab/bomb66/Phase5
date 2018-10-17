@@ -1,0 +1,7 @@
+We notice we need to enter a string, and this string is valid if it is equal to some string in memory
+In my case it was "flyers"
+
+However, the string is being cyphered before the comparison
+I notice the encoding was an involution operating on each letter
+
+I input all the letters and encode "flyers"
