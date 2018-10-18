@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<!-- saved from url=(0099)http://www.enseignement.polytechnique.fr/informatique/INF559/TD_18-19/bomblab/INF559-bomblab-1.html -->
+<html class="gr__enseignement_polytechnique_fr"><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+
+<meta name="generator" content="hevea 2.32">
+<style type="text/css">
+.li-itemize{margin:1ex 0ex;}
+.li-enumerate{margin:1ex 0ex;}
+.dd-description{margin:0ex 0ex 1ex 4ex;}
+.dt-description{margin:0ex;}
+.toc{list-style:none;}
+.footnotetext{margin:0ex; padding:0ex;}
+div.footnotetext P{margin:0px; text-indent:1em;}
+.thefootnotes{text-align:left;margin:0ex;}
+.dt-thefootnotes{margin:0em;}
+.dd-thefootnotes{margin:0em 0em 0em 2em;}
+.footnoterule{margin:1em auto 1em 0px;width:50%;}
+.caption{padding-left:2ex; padding-right:2ex; margin-left:auto; margin-right:auto}
+.title{margin:2ex auto;text-align:center}
+.titlemain{margin:1ex 2ex 2ex 1ex;}
+.titlerest{margin:0ex 2ex;}
+.center{text-align:center;margin-left:auto;margin-right:auto;}
+.flushleft{text-align:left;margin-left:0ex;margin-right:auto;}
+.flushright{text-align:right;margin-left:auto;margin-right:0ex;}
+div table{margin-left:inherit;margin-right:inherit;margin-bottom:2px;margin-top:2px}
+td table{margin:auto;}
+table{border-collapse:collapse;}
+td{padding:0;}
+.cellpadding0 tr td{padding:0;}
+.cellpadding1 tr td{padding:1px;}
+pre{text-align:left;margin-left:0ex;margin-right:auto;}
+blockquote{margin-left:4ex;margin-right:4ex;text-align:left;}
+td p{margin:0px;}
+.boxed{border:1px solid black}
+.textboxed{border:1px solid black}
+.vbar{border:none;width:2px;background-color:black;}
+.hbar{border:none;height:2px;width:100%;background-color:black;}
+.hfill{border:none;height:1px;width:200%;background-color:black;}
+.vdisplay{border-collapse:separate;border-spacing:2px;width:auto; empty-cells:show; border:2px solid red;}
+.vdcell{white-space:nowrap;padding:0px; border:2px solid green;}
+.display{border-collapse:separate;border-spacing:2px;width:auto; border:none;}
+.dcell{white-space:nowrap;padding:0px; border:none;}
+.dcenter{margin:0ex auto;}
+.vdcenter{border:solid #FF8000 2px; margin:0ex auto;}
+.minipage{text-align:left; margin-left:0em; margin-right:auto;}
+.marginpar{border:solid thin black; width:20%; text-align:left;}
+.marginparleft{float:left; margin-left:0ex; margin-right:1ex;}
+.marginparright{float:right; margin-left:1ex; margin-right:0ex;}
+.theorem{text-align:left;margin:1ex auto 1ex 0ex;}
+.part{margin:2ex auto;text-align:center}
+</style>
+<link rel="stylesheet" type="text/css" href="./bomblab_files/inf559.css">
+<title>INF 559 
+ Bomb Lab: Defusing a Binary Bomb
+</title>
+</head>
+<body data-gr-c-s-loaded="true">
+<!--HEVEA command line is: hevea bomblab.tex -->
+<!--CUT STYLE article--><!--CUT DEF section 1 --><table class="title"><tbody><tr><td style="padding:1ex"><h1 class="titlemain">INF 559<br>
+ Bomb Lab: Defusing a Binary Bomb</h1><h3 class="titlerest">
+Assigned: 10/10/2018, Due: 17/10/2018<br>
+</h3></td></tr>
+</tbody></table>
+<!--TOC section id="sec1" Introduction-->
+<h2 id="sec1" class="section">1&nbsp;&nbsp;Introduction</h2><!--SEC END --><p>The nefarious <em>Dr.&nbsp;Evil</em> has planted a slew of “binary bombs” on
+our class machines. A binary bomb is a program that consists of a
+sequence of phases. Each phase expects you to type a particular string
+on <span style="font-family:monospace">stdin</span>. If you type the correct string, then the phase is
+<em>defused</em> and the bomb proceeds to the next phase. Otherwise, the
+bomb <em>explodes</em> by printing <code>"BOOM!!!"</code> and then
+terminating. The bomb is defused when every phase has been defused.</p><p>There are too many bombs for us to deal with, so we are giving each
+student a bomb to defuse. Your mission, which you have no choice but to
+accept, is to defuse your bomb before the due date. Good luck, and
+welcome to the bomb squad!</p><!--TOC section id="sec2" Step 1: Get Your Bomb-->
+<h2 id="sec2" class="section">Step 1: Get Your Bomb</h2><!--SEC END --><p>You can obtain your bomb by pointing your Web browser at:</p><pre class="verbatim">   http://allemagne.polytechnique.fr:15213/
+</pre><p>This will display a binary bomb request form for you to fill in.
+Enter your user name and email address and hit the Submit button. The
+server will build your bomb and return it to your browser in a
+<span style="font-family:monospace">tar</span> file called <span style="font-family:monospace">bombk.tar</span>, where <span style="font-style:italic">k</span> is the unique
+number of your bomb.</p><p>Save the <span style="font-family:monospace">bombk.tar</span> file to a (protected) directory
+in which you plan to do your work. Then give the command: 
+<code>tar -xvf bombk.tar</code>. This will create a directory called
+<span style="font-family:monospace">./bombk</span> with the following files:
+</p><ul class="itemize"><li class="li-itemize">
+<span style="font-family:monospace">README</span>: Identifies the bomb and its owners.
+</li><li class="li-itemize"><span style="font-family:monospace">bomb</span>: The executable binary bomb.
+</li><li class="li-itemize"><span style="font-family:monospace">bomb.c</span>: Source file with the bomb’s main routine and a friendly greeting from Dr. Evil.
+</li></ul><p>If for some reason you request multiple bombs, this is not a
+problem. Choose one bomb to work on and delete the rest.</p><!--TOC section id="sec3" Step 2: Defuse Your Bomb-->
+<h2 id="sec3" class="section">Step 2: Defuse Your Bomb</h2><!--SEC END --><p>
+Your job for this lab is to defuse your bomb.</p><p>You must do the assignment on one of the class machines. In fact,
+there is a rumor that Dr. Evil really is evil, and the bomb will
+always blow up if run elsewhere. There are several other
+tamper-proofing devices built into the bomb as well, or so we hear.</p><p>You can use many tools to help you defuse your bomb. Please look at
+the <span style="font-weight:bold">hints</span> section for some tips and ideas. The best way is to
+use your favorite debugger to step through the disassembled binary.</p><p>Each time your bomb explodes it notifies the bomblab server, and you lose
+1/2 point (up to a max of 20 points) in the final score for the lab.
+So there are consequences to exploding the bomb. You must be careful!</p><p>The first four phases are worth 10 points each. Phases 5 and 6 are a
+little more difficult, so they are worth 15 points each. So the
+maximum score you can get is 70 points.</p><p>Although phases get progressively harder to defuse, the expertise you
+gain as you move from phase to phase should offset this
+difficulty. However, the last phase will challenge even the best
+students, so please don’t wait until the last minute to start.</p><p>The bomb ignores blank input lines. If you run your bomb with a
+command line argument, for example, 
+</p><pre>    linux&gt; <em> ./bomb psol.txt</em>
+</pre><p>
+then it will read the input lines from <span style="font-family:monospace">psol.txt</span> until it reaches
+EOF (end of file), and then switch over to <span style="font-family:monospace">stdin</span>. In a moment of
+weakness, Dr.&nbsp;Evil added this feature so you don’t have to keep
+retyping the solutions to phases you have already defused.</p><p>To avoid accidentally detonating the bomb, you will need to learn how to
+single-step through the assembly code and how to set breakpoints. You
+will also need to learn how to inspect both the registers and the
+memory states. One of the nice side-effects of doing the lab is that
+you will get very good at using a debugger. This is a crucial skill
+that will pay big dividends the rest of your career.</p><!--TOC section id="sec4" Logistics-->
+<h2 id="sec4" class="section">Logistics</h2><!--SEC END --><p>This is an individual project. All handins are electronic.
+Clarifications and corrections will be posted on the course message
+board.</p><!--TOC section id="sec5" Handin-->
+<h2 id="sec5" class="section">Handin</h2><!--SEC END --><p>There is no explicit handin. The bomb will notify your instructor
+automatically about your progress as you work on it. You can keep
+track of how you are doing by looking at the class scoreboard at:</p><pre class="verbatim">    http://allemagne.polytechnique.fr:15213/scoreboard
+</pre><p>This web page is updated continuously to show the progress for
+each bomb.</p><p><span style="font-weight:bold">IMPORTANT NOTE:</span> You can work on your buffer bomb on any Linux
+machine, but in order to submit your solution, you will need to be
+running on one of the machines of <span style="font-weight:bold">room 30/31/32/33/34/35/36</span>.</p><!--TOC section id="sec6" Hints <em>(Please read this!)</em>-->
+<h2 id="sec6" class="section">Hints <em>(Please read this!)</em></h2><!--SEC END --><p>There are many ways of defusing your bomb. You can examine it in
+great detail without ever running the program, and figure out exactly
+what it does. This is a useful technique, but it not always easy to
+do. You can also run it under a debugger, watch what it does step
+by step, and use this information to defuse it. This is probably the
+fastest way of defusing it.</p><p>We do make one request, <em>please do not use brute force!</em> You could
+write a program that will try every possible key to find the right
+one. But this is no good for several reasons:
+</p><ul class="itemize"><li class="li-itemize">
+You lose 1/2 point (up to a max of 20 points) 
+every time you guess incorrectly and the bomb explodes. </li><li class="li-itemize">Every time you guess wrong, a message is sent to the bomblab server. 
+You could very quickly saturate the network with these messages, and cause
+the system administrators to revoke your computer access.</li><li class="li-itemize">We haven’t told you how long the strings are, nor have we told you
+what characters are in them. Even if you made the (incorrect) assumptions
+that they all are less than 80 characters long and only contain
+letters, then you will have 26<sup>80</sup> guesses for each phase. This will
+take a very long time to run, and you will not get the answer before
+the assignment is due.
+</li></ul><p>Before defusing phase 3, you might want (or not) to read the notes on
+the compilation of switch statements found on the moodle.</p><p>There are many tools which are designed to help you figure out both
+how programs work, and what is wrong when they don’t work. Here is a
+list of some of the tools you may find useful in analyzing your bomb,
+and hints on how to use them.</p><ul class="itemize"><li class="li-itemize"><span style="font-family:monospace">gdb </span><p>The GNU debugger, this is a command line debugger tool available on
+virtually every platform. You can trace through a program line by
+line, examine memory and registers, look at both the source code and
+assembly code (we are not giving you the source code for most of your
+bomb), set breakpoints, set memory watch points, and write scripts.</p><p>The INF 559 moodle 
+has a very handy single-page <span style="font-family:monospace">gdb</span> summary that you can print out
+and use as a reference. Here are some other tips for using <span style="font-family:monospace">gdb</span>.
+</p><ul class="itemize"><li class="li-itemize">To keep the bomb from blowing up every time you type in a wrong
+input, you’ll want to learn how to set breakpoints.</li><li class="li-itemize">For online documentation, type “<span style="font-family:monospace">help</span>” at the <span style="font-family:monospace">gdb</span> 
+command prompt, 
+or type “<span style="font-family:monospace">man gdb</span>”, or “<span style="font-family:monospace">info gdb</span>” at a Unix prompt. 
+Some people also
+like to run <span style="font-family:monospace">gdb</span> under <span style="font-family:monospace">gdb-mode</span> in <span style="font-family:monospace">emacs</span>.
+</li></ul></li><li class="li-itemize"><span style="font-family:monospace">objdump -t</span><p>This will print out the bomb’s symbol table. The symbol table includes the
+names of all functions and global variables in the bomb, the names of
+all the functions the bomb calls, and their addresses. You may learn
+something by looking at the function names!</p></li><li class="li-itemize"><span style="font-family:monospace">objdump -d</span><p>Use this to disassemble all of the code in the bomb. You can also
+just look at individual functions. Reading the assembler code can
+tell you how the bomb works. </p><p>Although <span style="font-family:monospace">objdump -d</span> gives you a lot of information, it doesn’t tell
+you the whole story. Calls to system-level functions are displayed in
+a cryptic form. For example, a call to <span style="font-family:monospace">sscanf</span> might appear as:
+</p><pre class="verbatim">8048c36:  e8 99 fc ff ff  call   80488d4 &lt;_init+0x1a0&gt; 
+</pre><p>
+To determine that the call was to <span style="font-family:monospace">sscanf</span>, you would need to
+disassemble within <span style="font-family:monospace">gdb</span>.</p></li><li class="li-itemize"><span style="font-family:monospace">strings </span><p>This utility will display the printable strings in your bomb.</p></li></ul><p>Looking for a particular tool? How about documentation? Don’t
+forget, the commands <span style="font-family:monospace">apropos</span>, <span style="font-family:monospace">man</span>, and <span style="font-family:monospace">info</span> are your
+friends. In particular, <span style="font-family:monospace">man ascii</span> might come in useful. <span style="font-family:monospace">info gas</span> will give you more than you ever wanted to know about the
+GNU Assembler. Also, the web may also be a treasure trove of
+information. If you get stumped, feel free to ask your instructor for help.</p><!--CUT END -->
+<!--HTMLFOOT-->
+<!--ENDHTML-->
+<!--FOOTER-->
+<hr style="height:2"><blockquote class="quote"><em>This document was translated from L<sup>A</sup>T<sub>E</sub>X by
+</em><a href="http://hevea.inria.fr/index.html"><em>H</em><em><span style="font-size:small"><sup>E</sup></span></em><em>V</em><em><span style="font-size:small"><sup>E</sup></span></em><em>A</em></a><em>.</em></blockquote>
+
+</body></html>

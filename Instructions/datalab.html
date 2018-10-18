@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<!-- saved from url=(0099)https://www.enseignement.polytechnique.fr/informatique/INF559/TD_18-19/datalab/INF559-datalab-1.php -->
+<html class="gr__enseignement_polytechnique_fr"><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+
+<meta name="generator" content="hevea 2.32">
+<style type="text/css">
+.li-itemize{margin:1ex 0ex;}
+.li-enumerate{margin:1ex 0ex;}
+.dd-description{margin:0ex 0ex 1ex 4ex;}
+.dt-description{margin:0ex;}
+.toc{list-style:none;}
+.footnotetext{margin:0ex; padding:0ex;}
+div.footnotetext P{margin:0px; text-indent:1em;}
+.thefootnotes{text-align:left;margin:0ex;}
+.dt-thefootnotes{margin:0em;}
+.dd-thefootnotes{margin:0em 0em 0em 2em;}
+.footnoterule{margin:1em auto 1em 0px;width:50%;}
+.caption{padding-left:2ex; padding-right:2ex; margin-left:auto; margin-right:auto}
+.title{margin:2ex auto;text-align:center}
+.titlemain{margin:1ex 2ex 2ex 1ex;}
+.titlerest{margin:0ex 2ex;}
+.center{text-align:center;margin-left:auto;margin-right:auto;}
+.flushleft{text-align:left;margin-left:0ex;margin-right:auto;}
+.flushright{text-align:right;margin-left:auto;margin-right:0ex;}
+div table{margin-left:inherit;margin-right:inherit;margin-bottom:2px;margin-top:2px}
+td table{margin:auto;}
+table{border-collapse:collapse;}
+td{padding:0;}
+.cellpadding0 tr td{padding:0;}
+.cellpadding1 tr td{padding:1px;}
+pre{text-align:left;margin-left:0ex;margin-right:auto;}
+blockquote{margin-left:4ex;margin-right:4ex;text-align:left;}
+td p{margin:0px;}
+.boxed{border:1px solid black}
+.textboxed{border:1px solid black}
+.vbar{border:none;width:2px;background-color:black;}
+.hbar{border:none;height:2px;width:100%;background-color:black;}
+.hfill{border:none;height:1px;width:200%;background-color:black;}
+.vdisplay{border-collapse:separate;border-spacing:2px;width:auto; empty-cells:show; border:2px solid red;}
+.vdcell{white-space:nowrap;padding:0px; border:2px solid green;}
+.display{border-collapse:separate;border-spacing:2px;width:auto; border:none;}
+.dcell{white-space:nowrap;padding:0px; border:none;}
+.dcenter{margin:0ex auto;}
+.vdcenter{border:solid #FF8000 2px; margin:0ex auto;}
+.minipage{text-align:left; margin-left:0em; margin-right:auto;}
+.marginpar{border:solid thin black; width:20%; text-align:left;}
+.marginparleft{float:left; margin-left:0ex; margin-right:1ex;}
+.marginparright{float:right; margin-left:1ex; margin-right:0ex;}
+.theorem{text-align:left;margin:1ex auto 1ex 0ex;}
+.part{margin:2ex auto;text-align:center}
+</style>
+<link rel="stylesheet" type="text/css" href="./datalab_files/inf559.css">
+<title>datalab</title>
+</head>
+<body data-gr-c-s-loaded="true">
+<!--HEVEA command line is: hevea datalab.tex -->
+<!--CUT STYLE article--><!--CUT DEF section 1 --><table class="title"><tbody><tr><td style="padding:1ex"><h1 class="titlemain">INF 559<br>
+Data Lab: Manipulating Bits<br>
+</h1><h3 class="titlerest">Assigned: 19/9/2015, Due: 25/9/2015, midnight</h3></td></tr>
+</tbody></table>
+<!--TOC section id="sec1" Introduction-->
+<h2 id="sec1" class="section">1&nbsp;&nbsp;Introduction</h2><!--SEC END --><p>
+The purpose of this assignment is to become more familiar with
+bit-level representations of integers and floating point numbers.
+You’ll do this by solving a series of programming “puzzles.” Many of
+these puzzles are quite artificial, but you’ll find yourself thinking
+much more about bits in working your way through them.</p>
+<!--TOC section id="sec2" Logistics-->
+<h2 id="sec2" class="section">2&nbsp;&nbsp;Logistics</h2><!--SEC END --><p>This is an individual project. All handins are electronic.
+Clarifications and corrections will be posted on the course moodle.</p>
+<!--TOC section id="sec3" Handout Instructions-->
+<h2 id="sec3" class="section">3&nbsp;&nbsp;Handout Instructions</h2><!--SEC END --><p>Start by downloading the <a href="https://www.enseignement.polytechnique.fr/informatique/INF559/TD/datalab/datalab-handout.tar"><span style="font-family:monospace">datalab-handout.tar</span></a> archive. Copy <span style="font-family:monospace">datalab-handout.tar</span> to a (protected) directory
+on a Linux machine in which you plan to do your work. Then give the
+command
+</p><pre class="verbatim">  $ tar xvf datalab-handout.tar .   
+</pre><p>
+This will cause a number of files to be unpacked in the directory.
+The only file you will be modifying and turning in is <span style="font-family:monospace">bits.c</span>.</p><p>The <span style="font-family:monospace">bits.c</span> file contains a skeleton for each of the 15
+programming puzzles. Your assignment is to complete each function
+skeleton using only <em>straightline</em> code for the integer puzzles
+(i.e., no loops or conditionals) and a limited number of C arithmetic
+and logical operators. Specifically, you are <em>only</em> allowed to use
+the following eight operators:
+</p><pre class="verbatim"> ! ~ &amp; ^ | + &lt;&lt; &gt;&gt;
+</pre><p>
+A few of the functions further restrict this list. Also, you are not
+allowed to use any constants longer than 8 bits. See the comments in
+<span style="font-family:monospace">bits.c</span> for detailed rules and a discussion of the desired coding
+style.</p>
+<!--TOC section id="sec4" The Puzzles-->
+<h2 id="sec4" class="section">4&nbsp;&nbsp;The Puzzles</h2><!--SEC END --><p>This section describes the puzzles that you will be solving in <span style="font-family:monospace">bits.c</span>.</p>
+<!--TOC subsection id="sec5" Bit Manipulations-->
+<h3 id="sec5" class="subsection">4.1&nbsp;&nbsp;Bit Manipulations</h3><!--SEC END --><p>Table <a href="https://www.enseignement.polytechnique.fr/informatique/INF559/TD_18-19/datalab/INF559-datalab-1.php#bit-tab">1</a> describes a set of functions that manipulate and
+test sets of bits. The “Rating” field gives the difficulty rating
+(the number of points) for the puzzle, and the “Max ops” field gives
+the maximum number of operators you are allowed to use to implement
+each function. See the comments in <span style="font-family:monospace">bits.c</span> for more details on
+the desired behavior of the functions. You may also refer to the test
+functions in <span style="font-family:monospace">tests.c</span>. These are used as reference functions to
+express the correct behavior of your functions, although they don’t
+satisfy the coding rules for your functions.</p><blockquote class="table"><div class="center"><hr style="width:80%;height:2"></div>
+<div class="center">
+<table border="1" style="border-spacing:0;" class="cellpadding1"><tbody><tr><td style="text-align:left;border:solid 1px;white-space:nowrap">Name</td><td style="text-align:left;border:solid 1px;white-space:nowrap">Description</td><td style="text-align:center;border:solid 1px;white-space:nowrap">Rating</td><td style="text-align:center;border:solid 1px;white-space:nowrap">Max Ops</td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap">
+<span style="font-family:monospace">bitAnd(x,y)</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap"><code>x&amp;y</code> using only <code>~</code> and <code>|</code></td><td style="text-align:center;border:solid 1px;white-space:nowrap">1</td><td style="text-align:center;border:solid 1px;white-space:nowrap">8</td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap"><span style="font-family:monospace">upperBits(n)</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap">pads <code>n</code> upper bits with <code>1</code>’s</td><td style="text-align:center;border:solid 1px;white-space:nowrap">1</td><td style="text-align:center;border:solid 1px;white-space:nowrap">10</td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap"><span style="font-family:monospace">anyEvenBit(x)</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap">return <code>1</code> if any even-numbered bit in
+word are set to <code>1</code></td><td style="text-align:center;border:solid 1px;white-space:nowrap">2</td><td style="text-align:center;border:solid 1px;white-space:nowrap">12</td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap"><span style="font-family:monospace">byteSwap(x,n,m)</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap">swaps the <code>n</code>th byte and the <code>m</code>th byte</td><td style="text-align:center;border:solid 1px;white-space:nowrap">2</td><td style="text-align:center;border:solid 1px;white-space:nowrap">25 </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap"><span style="font-family:monospace">conditional(x,y,z)</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap">same as <code>x ? y : z</code></td><td style="text-align:center;border:solid 1px;white-space:nowrap">3</td><td style="text-align:center;border:solid 1px;white-space:nowrap">16 </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap"><span style="font-family:monospace">isAsciiDigit(x)</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap">return 1 if <code>0x30 &lt;= x &lt;= 0x39</code> <code>'0'</code> to <code>'9'</code>)</td><td style="text-align:center;border:solid 1px;white-space:nowrap">3</td><td style="text-align:center;border:solid 1px;white-space:nowrap">15 </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap"> <span style="font-family:monospace">bitCount(x)</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap">returns count of number of 1’s in word</td><td style="text-align:center;border:solid 1px;white-space:nowrap">4</td><td style="text-align:center;border:solid 1px;white-space:nowrap">40</td></tr>
+</tbody></table>
+</div>
+<div class="caption"><table style="border-spacing:6px;border-collapse:separate;" class="cellpading0"><tbody><tr><td style="vertical-align:top;text-align:left;">Table 1: Bit-Level Manipulation Functions.</td></tr>
+</tbody></table></div> 
+<a id="bit-tab"></a>
+<div class="center"><hr style="width:80%;height:2"></div></blockquote>
+<!--TOC subsection id="sec6" Two&#X2019;s Complement Arithmetic-->
+<h3 id="sec6" class="subsection">4.2&nbsp;&nbsp;Two’s Complement Arithmetic</h3><!--SEC END --><p>Table <a href="https://www.enseignement.polytechnique.fr/informatique/INF559/TD_18-19/datalab/INF559-datalab-1.php#two-tab">2</a> describes a set of functions that make use of the
+two’s complement representation of integers. Again, refer to the
+comments in <span style="font-family:monospace">bits.c</span> and the reference versions in <span style="font-family:monospace">tests.c</span>
+for more information.</p><blockquote class="table"><div class="center"><hr style="width:80%;height:2"></div>
+<div class="center">
+<table border="1" style="border-spacing:0;" class="cellpadding1"><tbody><tr><td style="text-align:left;border:solid 1px;white-space:nowrap">Name</td><td style="text-align:left;border:solid 1px;white-space:nowrap">Description</td><td style="text-align:center;border:solid 1px;white-space:nowrap">Rating</td><td style="text-align:center;border:solid 1px;white-space:nowrap">Max Ops</td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap"><span style="font-family:monospace">tmax()</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap">return maximum two’s complement integer</td><td style="text-align:center;border:solid 1px;white-space:nowrap">1</td><td style="text-align:center;border:solid 1px;white-space:nowrap">4 </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap"><span style="font-family:monospace">negate(x)</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap">return <code>-x</code></td><td style="text-align:center;border:solid 1px;white-space:nowrap">2</td><td style="text-align:center;border:solid 1px;white-space:nowrap">5</td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap"><span style="font-family:monospace">fitsBits(x,n)</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap">return 1 if <code>x</code> can be represented in <code>n</code>-bits</td><td style="text-align:center;border:solid 1px;white-space:nowrap">2</td><td style="text-align:center;border:solid 1px;white-space:nowrap">15 </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap"><span style="font-family:monospace">addOK(x,y)</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap">determine if can compute <code>x+y</code> without overflow</td><td style="text-align:center;border:solid 1px;white-space:nowrap">3</td><td style="text-align:center;border:solid 1px;white-space:nowrap">20</td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap"><span style="font-family:monospace">isGreater(x,y)</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap">if <code>x &gt; y</code> return 1, else return 0</td><td style="text-align:center;border:solid 1px;white-space:nowrap">3</td><td style="text-align:center;border:solid 1px;white-space:nowrap">24 </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap"><span style="font-family:monospace">absVal(x)</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap">absolute value of <code>x</code></td><td style="text-align:center;border:solid 1px;white-space:nowrap">4</td><td style="text-align:center;border:solid 1px;white-space:nowrap">10 </td></tr>
+</tbody></table>
+</div>
+<div class="caption"><table style="border-spacing:6px;border-collapse:separate;" class="cellpading0"><tbody><tr><td style="vertical-align:top;text-align:left;">Table 2: Arithmetic Functions</td></tr>
+</tbody></table></div>
+<a id="two-tab"></a>
+<div class="center"><hr style="width:80%;height:2"></div></blockquote>
+<!--TOC section id="sec7" Evaluation-->
+<h2 id="sec7" class="section">5&nbsp;&nbsp;Evaluation</h2><!--SEC END --><p>Your score will be computed out of a maximum of 62 points based on the
+following distribution:
+</p><dl class="description"><dt class="dt-description">
+<span style="font-weight:bold">31</span></dt><dd class="dd-description"> Correctness points.
+</dd><dt class="dt-description"><span style="font-weight:bold">26</span></dt><dd class="dd-description"> Performance points.
+</dd><dt class="dt-description"><span style="font-weight:bold">5</span></dt><dd class="dd-description"> Style points.
+</dd></dl><p><em>Correctness points.</em> The 13 puzzles you must solve have been given a
+difficulty rating between 1 and 4, such that their weighted sum totals
+to 31. We will evaluate your functions using the <span style="font-family:monospace">btest</span>
+program, which is described in the next section. You will get full
+credit for a puzzle if it passes all of the tests performed by
+<span style="font-family:monospace">btest</span>, and no credit otherwise.</p><p><em>Performance points.</em> Our main concern at this point in the course is
+that you can get the right answer. However, we want to instill in you
+a sense of keeping things as short and simple as you can.
+Furthermore, some of the puzzles can be solved by brute force, but we
+want you to be more clever. Thus, for each function we’ve established
+a maximum number of operators that you are allowed to use for each
+function. This limit is very generous and is designed only to catch
+egregiously inefficient solutions. You will receive two points for
+each correct function that satisfies the operator limit.</p><p><em>Style points.</em> Finally, we’ve reserved 5 points for a subjective
+evaluation of the style of your solutions and your commenting. Your
+solutions should be as clean and straightforward as possible. Your
+comments should be informative, but they need not be extensive.</p><!--TOC section id="sec8" Autograding your work-->
+<h2 id="sec8" class="section">Autograding your work</h2><!--SEC END --><p>We have included some autograding tools in the handout directory —
+<span style="font-family:monospace">btest</span>, <span style="font-family:monospace">dlc</span>, and <span style="font-family:monospace">driver.pl</span> — to help you
+check the correctness of your work.</p><ul class="itemize"><li class="li-itemize">
+<span style="font-weight:bold"><span style="font-family:monospace">btest:</span></span> This program checks the functional correctness of
+the functions in <span style="font-family:monospace">bits.c</span>. To build and use it, type the
+following two commands:
+<pre class="verbatim">  unix&gt; make
+  unix&gt; ./btest
+</pre>
+Notice that you must rebuild <span style="font-family:monospace">btest</span> each time you modify your <span style="font-family:monospace">bits.c</span> file. <p>You’ll find it helpful to work through the functions one at a time,
+testing each one as you go. You can use the <span style="font-family:monospace">-f</span> flag to instruct
+<span style="font-family:monospace">btest</span> to test only a single function:
+</p><pre class="verbatim">  unix&gt; ./btest -f bitAnd
+</pre><p>
+You can feed it specific function arguments
+using the option flags <span style="font-family:monospace">-1</span>, <span style="font-family:monospace">-2</span>, and <span style="font-family:monospace">-3</span>:
+</p><pre class="verbatim">  unix&gt; ./btest -f bitAnd -1 7 -2 0xf
+</pre><p>
+Check the file <span style="font-family:monospace">README</span> for documentation on running the <span style="font-family:monospace">b</span>test program.</p></li><li class="li-itemize"><span style="font-weight:bold"><span style="font-family:monospace">dlc</span></span><span style="font-weight:bold">:</span> This is a modified version of an ANSI C compiler from
+the MIT CILK group that you can use to check for compliance with the
+coding rules for each puzzle. The typical usage is:
+<pre class="verbatim">  unix&gt; ./dlc bits.c
+</pre>
+The program runs silently unless it detects a problem, such as an
+illegal operator, too many operators, or non-straightline code in the
+integer puzzles. Running with the <span style="font-family:monospace">-e</span> switch:
+<pre class="verbatim">  unix&gt; ./dlc -e bits.c  
+</pre>
+causes <span style="font-family:monospace">dlc</span> to print counts of the number of operators used by
+each function. Type <span style="font-family:monospace">./dlc -help</span> for a list of command line options. </li><li class="li-itemize"><span style="font-weight:bold"><span style="font-family:monospace">driver.pl</span></span><span style="font-weight:bold">:</span> This is a driver program that uses <span style="font-family:monospace">btest</span>
+and <span style="font-family:monospace">dlc</span> to compute the correctness and performance points for
+your solution. It takes no arguments:
+<pre class="verbatim">  unix&gt; ./driver.pl
+</pre>
+Your instructors will use <span style="font-family:monospace">driver.pl</span> to evaluate your
+solution.</li></ul>
+<!--TOC section id="sec9" Handin Instructions-->
+<h2 id="sec9" class="section">6&nbsp;&nbsp;Handin Instructions</h2><!--SEC END --><p>Do not forget to write your name and userid in line 4 of bits.c.
+Then identify yourself with your login and password:</p><p>
+</p><p><a name="UPLOAD_LOGIN_FORM"></a></p>
+<form action="https://www.enseignement.polytechnique.fr/informatique/INF559/TD_18-19/datalab/INF559-datalab-1.php#UPLOAD_LOGIN_FORM" method="post" class="EditForm">
+<p>
+<input type="hidden" name="Auth_Action" value="Connect">
+<strong>&nbsp;Login&nbsp;:</strong>
+<input name="Auth_Login" type="text" value="" size="64" maxlength="64" style="background: silver; border: none;">
+<strong>&nbsp;Mot de passe&nbsp;:</strong>
+<input name="Auth_Password" type="password" value="" size="20" maxlength="80" style="background: silver; border: none;">
+<input type="submit" value="Connecter" style="border-radius: 10px; background: #e0e0e0; text-decoration: underline; border: none;">
+</p>
+</form>
+<p style="color:#FF0000">
+<strong></strong>
+</p>
+
+<p></p><p>Then submit your <span style="font-family:monospace">bits.c</span> file via the following form:</p><p>
+<!--UPLOAD_INF559-datalab#ex_1-->
+</p><p>You may submit your solution for testing as many times as you wish up
+until the due date. Only the last version you submit will be graded.</p><p>When testing your files locally, make sure to use one of the lab
+machines. This will insure that the grade you get from <span style="font-family:monospace">driver.pl</span>
+is representative of the grade you will receive when you submit your
+solution.</p>
+<!--TOC section id="sec10" Advice-->
+<h2 id="sec10" class="section">7&nbsp;&nbsp;Advice</h2><!--SEC END --><ul class="itemize"><li class="li-itemize">Don’t include the <code>&lt;stdio.h&gt;</code> header file in your <span style="font-family:monospace">bits.c</span> file, as it confuses <span style="font-family:monospace">dlc</span> and results in some
+non-intuitive error messages. You will still be able to use <span style="font-family:monospace">printf</span> in your <span style="font-family:monospace">bits.c</span> file for debugging without including the
+<code>&lt;stdio.h&gt;</code> header, although <span style="font-family:monospace">gcc</span> will print a warning that
+you can ignore.</li><li class="li-itemize">The <span style="font-family:monospace">dlc</span> program enforces a stricter form of C declarations
+than is the case for C++ or that is enforced by <span style="font-family:monospace">gcc</span>. In
+particular, any declaration must appear in a block (what you enclose
+in curly braces) before any statement that is not a declaration. For
+example, it will complain about the following code:
+<pre class="verbatim">  int foo(int x)
+  {
+    int a = x;
+    a *= 3;     /* Statement that is not a declaration */
+    int b = a;  /* ERROR: Declaration not allowed here */
+  }
+</pre></li></ul>
+<!--TOC section id="sec11" The &#X201C;Beat the Prof&#X201D; Contest-->
+<h2 id="sec11" class="section">8&nbsp;&nbsp;The “Beat the Prof” Contest</h2><!--SEC END --><p>For fun, we’re offering an optional “Beat the Prof” contest that
+allows you to compete with other students and the instructor to
+develop the most efficient puzzles. The goal is to solve each Data Lab
+puzzle using the fewest number of operators. Students who match or
+beat the instructor’s operator count for each puzzle are winners!</p><p>To submit your entry to the contest, type:
+</p><pre class="verbatim">    unix&gt; ./driver.pl -u ``Your Nickname''
+</pre><p>
+Nicknames are limited to 35 characters and can contain alphanumerics,
+apostrophes, commas, periods, dashes, underscores, and ampersands.
+You can submit as often as you like. Your most recent submission will
+appear on a real-time scoreboard, identified only by your nickname.
+You can view the scoreboard by pointing your browser at
+</p><pre class="verbatim">        http://allemagne:8080
+</pre><p>Enjoy.</p><p><span style="font-weight:bold">Important:</span> even if you play the “Beat the Prof” contest, you must submit your solution as described in Sec.&nbsp;6.</p><!--CUT END -->
+<!--HTMLFOOT-->
+<!--ENDHTML-->
+<!--FOOTER-->
+<hr style="height:2"><blockquote class="quote"><em>This document was translated from L<sup>A</sup>T<sub>E</sub>X by
+</em><a href="http://hevea.inria.fr/index.html"><em>H</em><em><span style="font-size:small"><sup>E</sup></span></em><em>V</em><em><span style="font-size:small"><sup>E</sup></span></em><em>A</em></a><em>.</em></blockquote>
+
+</body></html>

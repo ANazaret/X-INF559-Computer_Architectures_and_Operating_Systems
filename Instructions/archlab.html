@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<!-- saved from url=(0099)https://www.enseignement.polytechnique.fr/informatique/INF559/TD_18-19/archlab/INF559-archlab-1.php -->
+<html class="gr__enseignement_polytechnique_fr"><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+
+<meta name="generator" content="hevea 2.32">
+<style type="text/css">
+.li-itemize{margin:1ex 0ex;}
+.li-enumerate{margin:1ex 0ex;}
+.dd-description{margin:0ex 0ex 1ex 4ex;}
+.dt-description{margin:0ex;}
+.toc{list-style:none;}
+.footnotetext{margin:0ex; padding:0ex;}
+div.footnotetext P{margin:0px; text-indent:1em;}
+.thefootnotes{text-align:left;margin:0ex;}
+.dt-thefootnotes{margin:0em;}
+.dd-thefootnotes{margin:0em 0em 0em 2em;}
+.footnoterule{margin:1em auto 1em 0px;width:50%;}
+.caption{padding-left:2ex; padding-right:2ex; margin-left:auto; margin-right:auto}
+.title{margin:2ex auto;text-align:center}
+.titlemain{margin:1ex 2ex 2ex 1ex;}
+.titlerest{margin:0ex 2ex;}
+.center{text-align:center;margin-left:auto;margin-right:auto;}
+.flushleft{text-align:left;margin-left:0ex;margin-right:auto;}
+.flushright{text-align:right;margin-left:auto;margin-right:0ex;}
+div table{margin-left:inherit;margin-right:inherit;margin-bottom:2px;margin-top:2px}
+td table{margin:auto;}
+table{border-collapse:collapse;}
+td{padding:0;}
+.cellpadding0 tr td{padding:0;}
+.cellpadding1 tr td{padding:1px;}
+pre{text-align:left;margin-left:0ex;margin-right:auto;}
+blockquote{margin-left:4ex;margin-right:4ex;text-align:left;}
+td p{margin:0px;}
+.boxed{border:1px solid black}
+.textboxed{border:1px solid black}
+.vbar{border:none;width:2px;background-color:black;}
+.hbar{border:none;height:2px;width:100%;background-color:black;}
+.hfill{border:none;height:1px;width:200%;background-color:black;}
+.vdisplay{border-collapse:separate;border-spacing:2px;width:auto; empty-cells:show; border:2px solid red;}
+.vdcell{white-space:nowrap;padding:0px; border:2px solid green;}
+.display{border-collapse:separate;border-spacing:2px;width:auto; border:none;}
+.dcell{white-space:nowrap;padding:0px; border:none;}
+.dcenter{margin:0ex auto;}
+.vdcenter{border:solid #FF8000 2px; margin:0ex auto;}
+.minipage{text-align:left; margin-left:0em; margin-right:auto;}
+.marginpar{border:solid thin black; width:20%; text-align:left;}
+.marginparleft{float:left; margin-left:0ex; margin-right:1ex;}
+.marginparright{float:right; margin-left:1ex; margin-right:0ex;}
+.theorem{text-align:left;margin:1ex auto 1ex 0ex;}
+.part{margin:2ex auto;text-align:center}
+</style>
+<link rel="stylesheet" type="text/css" href="./archlab_files/inf559.css">
+<title>archlab</title>
+</head>
+<body data-gr-c-s-loaded="true">
+<!--HEVEA command line is: hevea archlab.tex -->
+<!--CUT STYLE article--><!--CUT DEF section 1 --><table class="title"><tbody><tr><td style="padding:1ex"><h1 class="titlemain">INF 559<br>
+Arch Lab: Exploring Sequential and Pipelined Processors</h1><h3 class="titlerest">Assigned: 26/9/2018, Due: 10/10/2018</h3></td></tr>
+</tbody></table>
+<!--TOC section id="sec1" Introduction-->
+<h2 id="sec1" class="section">1&nbsp;&nbsp;Introduction</h2><!--SEC END --><p>In the first part of this lab (first week) we will make our first
+steps in assembly programming and will learn about the design of a
+sequential Y86-64 processor. In the second part (second week), you will
+learn about the design and implementation of a pipelined Y86-64
+processor, optimizing both it and a benchmark program to maximize
+performance. You are allowed to make any semantics preserving
+transformations to the benchmark program, or to make enhancements to
+the pipelined processor, or both. When you have completed the lab, you
+will have a keen appreciation for the interactions between code and
+hardware that affect the performance of your programs.</p><p>The lab is organized into three parts, each with its own handin. In
+Part A you will write some simple Y86-64 programs and become familiar
+with the Y86-64 tools. In Part B, you will extend the SEQ simulator with
+a new instruction. These two parts will prepare you for Part C, the
+heart of the lab, where you will optimize the Y86-64 benchmark program and
+the processor design.</p>
+<!--TOC section id="sec2" Logistics-->
+<h2 id="sec2" class="section">2&nbsp;&nbsp;Logistics</h2><!--SEC END --><p>This is an individual project. All handins are electronic.
+Clarifications and corrections will be posted on the course moodle.</p>
+<!--TOC section id="sec3" Handout Instructions-->
+<h2 id="sec3" class="section">3&nbsp;&nbsp;Handout Instructions</h2><!--SEC END --><ol class="enumerate" type="1"><li class="li-enumerate">
+Start by downloading the <a href="https://www.enseignement.polytechnique.fr/informatique/INF559/TD_18-19/archlab/archlab-handout.tar">archlab-handout.tar</a> archive. Copy <span style="font-family:monospace">archlab-handout.tar</span> to a (protected) directory
+on a Linux machine in which you plan to do your work.</li><li class="li-enumerate">Then give the command: <code>tar xvf archlab-handout.tar</code>. This will
+cause the following files to be unpacked: <span style="font-family:monospace">README</span>, <span style="font-family:monospace">sim.tar</span>, <span style="font-family:monospace">simguide.pdf</span>. </li><li class="li-enumerate">Next, give the command <code>cd archlab-handout</code> and then <code>tar xvf sim.tar</code>. This will create the
+directory <span style="font-family:monospace">sim</span>, which contains your personal copy of the Y86-64
+tools. You will be doing all of your work inside this directory.</li><li class="li-enumerate">Finally, change to the <span style="font-family:monospace">sim</span> directory and build the
+Y86-64 tools:
+<pre class="verbatim">  $ cd sim
+  (optional but recommended: uncomment the GUIMODE=-DHAS_GUI line in the Makefile to build the graphical simulator)
+  $ make clean; make
+</pre>
+</li></ol>
+<!--TOC section id="sec4" Part A &#X2014; Week 1-->
+<h2 id="sec4" class="section">4&nbsp;&nbsp;Part A — Week 1</h2><!--SEC END --><p>You will be working in directory <span style="font-family:monospace">sim/misc</span> in this part.</p><p>Your task is to write and simulate the following three Y86-64
+programs. The required behavior of these programs is defined by the
+example C functions in <span style="font-family:monospace">examples.c</span>. Be sure to put your name
+and ID in a comment at the beginning of each program. You can test
+your programs by first assemblying them with the program <span style="font-variant:small-caps">yas</span>
+and then running them with the instruction set simulator <span style="font-variant:small-caps">yis</span>.</p><!--TOC subsection id="sec5" <span style="font-family:monospace">expr.ys</span>: Warming up with arithmetic expressions and conditionals-->
+<h3 id="sec5" class="subsection"><span style="font-family:monospace">expr.ys</span>: Warming up with arithmetic expressions and conditionals</h3><!--SEC END --><p>Write a program (<span style="font-family:monospace">expr.ys</span>) that computes the C expression:
+</p><pre class="verbatim">   y = x &gt; 5 ? x+1 : x;
+</pre><p>
+Test you program with the two test cases below:
+</p><ul class="itemize"><li class="li-itemize">
+Test 1 (should terminate with <code>y == -1</code>):
+<pre class="verbatim">.pos 256
+x: .quad 0xffffffffffffffff
+y: .quad 0x00
+</pre></li><li class="li-itemize">Test 2 (should terminate with <code>y == 13</code>):
+<pre class="verbatim">.pos 256
+x: .quad 0x0c
+y: .quad 0x00
+</pre>
+</li></ul><p>Assembly it by issuing (inside the directory <code>misc</code>):
+</p><pre class="verbatim">  $ ./yas expr.ys
+</pre><p>
+Ther generated object file <code>expr.yo</code>, will be a memory dump where
+the instructions have been encoded starting from memory location
+<code>0</code>, and 16 bytes have been reserved for the variables <code>x</code>
+and <code>y</code> starting at location <code>0x64</code> (= 100 in hex) and
+initialised with <code>c</code> and <code>0</code>. You can then run the
+instruction simulator with:
+</p><pre class="verbatim">  $ ./yis expr.yo
+</pre><p>
+This will print the final state reached by the program (you cannot do
+step-by-step with the instruction simulator). Alternatively, you can
+run the simulator of the SEQ architecture with:
+</p><pre class="verbatim">  $ (cd ../seq; ./ssim -g ../misc/expr.yo)
+</pre><p>
+Observe that both the instruction simulator and the SEQ simulator require an object file.</p><!--TOC subsection id="sec6" <span style="font-family:monospace">copy.ys</span>: Copy a source block to a destination block-->
+<h3 id="sec6" class="subsection"><span style="font-family:monospace">copy.ys</span>: Copy a source block to a destination block</h3><!--SEC END --><p>Write a program (<span style="font-family:monospace">copy.ys</span>) that copies a block of words
+from one part of memory to another (non-overlapping) area of
+memory, computing the checksum (Xor) of all the words copied.</p><p>Your program should consist of code that
+should be functionally equivalent 
+to the C code shown
+below, where <code>len</code>, <code>src</code>, <code>dest</code>, and <code>result</code> are global
+variables:
+</p><pre><span style="font-size:small">  00</span>   /* copy_block - Copy src to dest and return xor checksum of src */
+<span style="font-size:small">  03</span>   result = 0;
+<span style="font-size:small">  04</span>   while (len &gt; 0) <code>{</code>
+<span style="font-size:small">  05</span>       int val = *src++;
+<span style="font-size:small">  06</span>       *dest++ = val;
+<span style="font-size:small">  07</span>       result ^= val;
+<span style="font-size:small">  08</span>       len--;
+<span style="font-size:small">  09</span>   <code>}</code>
+</pre><p>Test your
+program using the following three-element source and destination
+blocks:</p><pre><span style="font-size:small">
+.align 8
+# Source block
+src:
+        .quad 0x00a
+        .quad 0x0b0
+        .quad 0xc00
+
+# Destination block
+dest:
+        .quad 0x111
+        .quad 0x222
+        .quad 0x333
+
+# Length
+len:
+        .quad 0x3
+</span></pre><p>To understand the memory layout of the example, remember that an array
+is stored in memory by placing contiguosly (at increasing addresses)
+its content: the example corresponds to the familiar C declaration:
+</p><pre class="verbatim">long src[] = {0x00a, 0x0b0, 0xc00};
+long dst[] = {0x111, 0x222, 0x333};
+long len = 3;
+</pre><p>
+The address of the array elements can be computed by adding on offset
+to the base address of the array. In the example, as <code>src</code> is
+stored from location <code>100</code>, we get that <code>src[0]</code> is at
+address <code>100</code>, <code>src[1]</code> at <code>108</code> (that is <code>100</code>
+plus the with of one long int which is <code>8</code>), <code>src[2]</code> at
+<code>110</code>. The addressing mode <code>D(rA)</code> enables an easy 
+computation of these addresses: the constant <code>D</code> will be the address of
+<code>src</code> (statically computed by the assembler pass), and 
+the offset can be kept in the register <code>rA</code>.</p>
+<!--TOC section id="sec7" Part B-->
+<h2 id="sec7" class="section">5&nbsp;&nbsp;Part B</h2><!--SEC END --><p>You will be working in directory <span style="font-family:monospace">sim/seq</span> in this part.</p><p>Your task in Part B is to extend the SEQ processor to support the
+<span style="font-family:monospace">iaddq</span>, with the following format: </p><p><img src="./archlab_files/inf559-archlab64-fig2.png"></p><p><em>This instruction adds the constant value </em><span style="font-style:italic">V</span><em> to register </em><span style="font-style:italic">rB</span><em>.</em></p><p>To add this instructions, you will modify the file
+<span style="font-family:monospace">seq-full.hcl</span>,
+which implements the version of SEQ described in the CS:APP3e textbook
+for the Y86-64 architecture.
+In addition, it contains declarations of some constants that you will
+need for your solution.</p><p>Your HCL file must begin with a header comment containing
+the following information:
+</p><ul class="itemize"><li class="li-itemize">
+Your name and ID.
+</li><li class="li-itemize">A description of the computations required for the <span style="font-family:monospace">iaddq</span>
+instruction. You can use the descriptions of <span style="font-family:monospace">irmovq</span> and <span style="font-family:monospace">OPq</span> 
+in Figure 4.18 in the CS:APP3e text as a guide. 
+</li></ul><!--TOC subsection id="sec8" Building and Testing Your Solution-->
+<h3 id="sec8" class="subsection">Building and Testing Your Solution</h3><!--SEC END --><p>Once you have finished modifying the <span style="font-family:monospace">seq-full.hcl</span> file, then
+you will need to build a new instance of the SEQ simulator (<span style="font-family:monospace">ssim</span>)
+based on this HCL file, and then test it:</p><ul class="itemize"><li class="li-itemize">
+<em>Building a new simulator.</em> 
+You can use <span style="font-family:monospace">make</span> to build a new SEQ simulator:
+<pre><span style="font-size:small">
+unix&gt; </span><span style="font-size:small"><em> make VERSION=full</em></span><span style="font-size:small">
+</span></pre>
+This builds a version of <span style="font-family:monospace">ssim</span> that uses the control logic you
+specified in <span style="font-family:monospace">seq-full.hcl</span>. To save typing, you can assign
+<span style="font-family:monospace">VERSION=full</span> in the Makefile. </li><li class="li-itemize"><em>Testing your solution on a simple Y86-64 program.</em>
+For your initial testing, we recommend running simple programs such
+as <span style="font-family:monospace">asumi.yo</span> (testing <span style="font-family:monospace">iaddq</span>) in TTY mode,
+comparing the results against the ISA simulation:
+<pre><span style="font-size:small">
+unix&gt; </span><span style="font-size:small"><em> ./ssim -t ../y86-code/asumi.yo</em></span><span style="font-size:small">
+</span></pre>
+If the ISA test fails, then you should debug your implementation by
+single stepping the simulator in GUI mode:
+<pre><span style="font-size:small">
+unix&gt; </span><span style="font-size:small"><em> ./ssim -g ../y86-code/asumi.yo</em></span><span style="font-size:small">
+</span></pre></li><li class="li-itemize"><em>Retesting your solution using the benchmark programs.</em>
+Once your simulator is able to correctly execute small programs, then
+you can automatically test it on the Y86-64 benchmark programs in <span style="font-family:monospace">../y86-code</span>:
+<pre><span style="font-size:small">
+unix&gt; </span><span style="font-size:small"><em> (cd ../y86-code; make testssim)</em></span><span style="font-size:small">
+</span></pre>
+This will run <span style="font-family:monospace">ssim</span> on the benchmark programs and check for
+correctness by comparing the resulting processor state with the state
+from a high-level ISA simulation.
+Note that none of these programs test the added instructions.
+You are simply making sure that your solution did not inject errors
+for the original instructions.
+See file
+<span style="font-family:monospace">../y86-code/README</span> file for more details.</li><li class="li-itemize"><em>Performing regression tests.</em>
+Once you can execute the benchmark programs correctly, then you should
+run the extensive set of regression tests in <span style="font-family:monospace">../ptest</span>. To test
+everything except <span style="font-family:monospace">iaddq</span> and <span style="font-family:monospace">leave</span>:
+<pre><span style="font-size:small">
+unix&gt; </span><span style="font-size:small"><em> (cd ../ptest; make SIM=../seq/ssim)</em></span><span style="font-size:small">
+</span></pre>
+To test your implementation of <span style="font-family:monospace">iaddq</span>:
+<pre><span style="font-size:small">
+unix&gt; </span><span style="font-size:small"><em> (cd ../ptest; make SIM=../seq/ssim TFLAGS=-i)</em></span><span style="font-size:small">
+</span></pre>
+</li></ul><p>For more information on the SEQ simulator refer to the handout
+<span style="font-style:italic">CS:APP3e Guide to Y86-64 Processor Simulators</span> (<span style="font-family:monospace">simguide.pdf</span>).</p>
+<!--TOC section id="sec9" Part C &#X2014; Week 2-->
+<h2 id="sec9" class="section">6&nbsp;&nbsp;Part C — Week 2</h2><!--SEC END --><p>You will be working in directory <span style="font-family:monospace">sim/pipe</span> in this part.</p><p>The <span style="font-family:monospace">ncopy</span> function in Figure&nbsp;<a href="https://www.enseignement.polytechnique.fr/informatique/INF559/TD_18-19/archlab/INF559-archlab-1.php#fig%3Ancopyc">1</a> copies a
+<span style="font-family:monospace">len</span>-element integer array <span style="font-family:monospace">src</span> to a non-overlapping
+<span style="font-family:monospace">dst</span>, returning a count of the number of positive integers
+contained in <span style="font-family:monospace">src</span>.
+</p><blockquote class="figure"><div class="center"><hr style="width:80%;height:2"></div>
+<span style="font-size:small">
+</span><pre><span style="font-size:small">
+</span><span style="font-size:small">   1</span><span style="font-size:small"> /*
+</span><span style="font-size:small">   2</span><span style="font-size:small">  * ncopy - copy src to dst, returning number of positive ints
+</span><span style="font-size:small">   3</span><span style="font-size:small">  * contained in src array.
+</span><span style="font-size:small">   4</span><span style="font-size:small">  */
+</span><span style="font-size:small">   5</span><span style="font-size:small"> word_t ncopy(word_t *src, word_t *dst, word_t len)
+</span><span style="font-size:small">   6</span><span style="font-size:small"> </span><code><span style="font-size:small">{</span></code><span style="font-size:small">
+</span><span style="font-size:small">   7</span><span style="font-size:small">     word_t count = 0;
+</span><span style="font-size:small">   8</span><span style="font-size:small">     word_t val;
+</span><span style="font-size:small">   9</span><span style="font-size:small"> 
+</span><span style="font-size:small">  10</span><span style="font-size:small">     while (len &gt; 0) </span><code><span style="font-size:small">{</span></code><span style="font-size:small">
+</span><span style="font-size:small">  11</span><span style="font-size:small">         val = *src++;
+</span><span style="font-size:small">  12</span><span style="font-size:small">         *dst++ = val;
+</span><span style="font-size:small">  13</span><span style="font-size:small">         if (val &gt; 0)
+</span><span style="font-size:small">  14</span><span style="font-size:small">             count++;
+</span><span style="font-size:small">  15</span><span style="font-size:small">         len--;
+</span><span style="font-size:small">  16</span><span style="font-size:small">     </span><code><span style="font-size:small">}</span></code><span style="font-size:small">
+</span><span style="font-size:small">  17</span><span style="font-size:small">     return count;
+</span><span style="font-size:small">  18</span><span style="font-size:small"> </span><code><span style="font-size:small">}</span></code><span style="font-size:small">
+</span></pre><span style="font-size:small">
+
+</span>
+<div class="caption"><table style="border-spacing:6px;border-collapse:separate;" class="cellpading0"><tbody><tr><td style="vertical-align:top;text-align:left;">Figure 1: <span style="font-size:small"><span style="font-family:sans-serif"><span style="font-weight:bold">C version of the </span></span></span><span style="font-size:small"><span style="font-weight:bold"><span style="font-family:monospace">ncopy</span></span></span><span style="font-size:small"><span style="font-family:sans-serif"><span style="font-weight:bold"> function.</span></span></span><span style="font-size:small"><span style="font-family:sans-serif"> See </span></span><span style="font-size:small"><span style="font-family:monospace">sim/pipe/ncopy.c.</span></span></td></tr>
+</tbody></table></div>
+<a id="fig:ncopyc"></a>
+<div class="center"><hr style="width:80%;height:2"></div></blockquote><p>
+Figure&nbsp;<a href="https://www.enseignement.polytechnique.fr/informatique/INF559/TD_18-19/archlab/INF559-archlab-1.php#fig%3Ancopys">2</a> shows the baseline Y86-64 version of <span style="font-family:monospace">ncopy</span>. 
+</p><blockquote class="figure"><div class="center"><hr style="width:80%;height:2"></div>
+<span style="font-size:small">
+</span><pre><span style="font-size:small">
+</span><span style="font-size:small">   1</span><span style="font-size:small"> ##################################################################
+</span><span style="font-size:small">   2</span><span style="font-size:small"> # ncopy.ys - Copy a src block of len words to dst.
+</span><span style="font-size:small">   3</span><span style="font-size:small"> # Return the number of positive words (&gt;0) contained in src.
+</span><span style="font-size:small">   4</span><span style="font-size:small"> #
+</span><span style="font-size:small">   5</span><span style="font-size:small"> # Include your name and ID here.
+</span><span style="font-size:small">   6</span><span style="font-size:small"> #
+</span><span style="font-size:small">   7</span><span style="font-size:small"> # Describe how and why you modified the baseline code.
+</span><span style="font-size:small">   8</span><span style="font-size:small"> #
+</span><span style="font-size:small">   9</span><span style="font-size:small"> ##################################################################
+</span><span style="font-size:small">  10</span><span style="font-size:small"> # Do not modify this portion
+</span><span style="font-size:small">  11</span><span style="font-size:small"> # Function prologue.
+</span><span style="font-size:small">  12</span><span style="font-size:small"> # %rdi = src, %rsi = dst, %rdx = len
+</span><span style="font-size:small">  13</span><span style="font-size:small"> ncopy:
+</span><span style="font-size:small">  14</span><span style="font-size:small"> 
+</span><span style="font-size:small">  15</span><span style="font-size:small"> ##################################################################
+</span><span style="font-size:small">  16</span><span style="font-size:small"> # You can modify this portion
+</span><span style="font-size:small">  17</span><span style="font-size:small">         # Loop header
+</span><span style="font-size:small">  18</span><span style="font-size:small">         xorq %rax,%rax          # count = 0;
+</span><span style="font-size:small">  19</span><span style="font-size:small">         andq %rdx,%rdx          # len &lt;= 0?
+</span><span style="font-size:small">  20</span><span style="font-size:small">         jle Done                # if so, goto Done:
+</span><span style="font-size:small">  21</span><span style="font-size:small"> 
+</span><span style="font-size:small">  22</span><span style="font-size:small"> Loop:   mrmovq (%rdi), %r10     # read val from src...
+</span><span style="font-size:small">  23</span><span style="font-size:small">         rmmovq %r10, (%rsi)     # ...and store it to dst
+</span><span style="font-size:small">  24</span><span style="font-size:small">         andq %r10, %r10         # val &lt;= 0?
+</span><span style="font-size:small">  25</span><span style="font-size:small">         jle Npos                # if so, goto Npos:
+</span><span style="font-size:small">  26</span><span style="font-size:small">         irmovq $1, %r10
+</span><span style="font-size:small">  27</span><span style="font-size:small">         addq %r10, %rax         # count++
+</span><span style="font-size:small">  28</span><span style="font-size:small"> Npos:   irmovq $1, %r10
+</span><span style="font-size:small">  29</span><span style="font-size:small">         subq %r10, %rdx         # len--
+</span><span style="font-size:small">  30</span><span style="font-size:small">         irmovq $8, %r10
+</span><span style="font-size:small">  31</span><span style="font-size:small">         addq %r10, %rdi         # src++
+</span><span style="font-size:small">  32</span><span style="font-size:small">         addq %r10, %rsi         # dst++
+</span><span style="font-size:small">  33</span><span style="font-size:small">         andq %rdx,%rdx          # len &gt; 0?
+</span><span style="font-size:small">  34</span><span style="font-size:small">         jg Loop                 # if so, goto Loop:
+</span><span style="font-size:small">  35</span><span style="font-size:small"> ##################################################################
+</span><span style="font-size:small">  36</span><span style="font-size:small"> # Do not modify the following section of code
+</span><span style="font-size:small">  37</span><span style="font-size:small"> # Function epilogue.
+</span><span style="font-size:small">  38</span><span style="font-size:small"> Done:
+</span><span style="font-size:small">  39</span><span style="font-size:small">         ret
+</span><span style="font-size:small">  40</span><span style="font-size:small"> ##################################################################
+</span><span style="font-size:small">  41</span><span style="font-size:small"> # Keep the following label at the end of your function
+</span><span style="font-size:small">  42</span><span style="font-size:small"> End:
+</span></pre><span style="font-size:small">
+
+</span>
+<div class="caption"><table style="border-spacing:6px;border-collapse:separate;" class="cellpading0"><tbody><tr><td style="vertical-align:top;text-align:left;">Figure 2: <span style="font-size:small"><span style="font-family:sans-serif"><span style="font-weight:bold">Baseline Y86-64 version of the </span></span></span><span style="font-size:small"><span style="font-weight:bold"><span style="font-family:monospace">ncopy</span></span></span><span style="font-size:small"><span style="font-family:sans-serif"><span style="font-weight:bold"> function.</span></span></span><span style="font-size:small"><span style="font-family:sans-serif"> See </span></span><span style="font-size:small"><span style="font-family:monospace">sim/pipe/ncopy.ys.</span></span></td></tr>
+</tbody></table></div>
+<a id="fig:ncopys"></a>
+<div class="center"><hr style="width:80%;height:2"></div></blockquote><p>
+The file <span style="font-family:monospace">pipe-full.hcl</span> contains a copy of the HCL
+code for PIPE, along with a declaration of the constant value <span style="font-family:monospace">IIADDQ</span>.</p><p>Your task in Part C is to modify <span style="font-family:monospace">ncopy.ys</span> and
+<span style="font-family:monospace">pipe-full.hcl</span> with the goal of making <span style="font-family:monospace">ncopy.ys</span> run
+as fast as possible.</p><p>You will be handing in two files: <span style="font-family:monospace">pipe-full.hcl</span> and 
+<span style="font-family:monospace">ncopy.ys</span>. Each file should begin with a header comment
+with the following information:
+</p><ul class="itemize"><li class="li-itemize">
+Your name and ID.
+</li><li class="li-itemize">A high-level description of your code. In each case, describe
+how and why you modified your code.
+</li></ul><!--TOC subsection id="sec10" Coding Rules-->
+<h3 id="sec10" class="subsection">Coding Rules</h3><!--SEC END --><p>You are free to make any modifications you wish, with the following
+constraints:</p><ul class="itemize"><li class="li-itemize">
+Your <span style="font-family:monospace">ncopy.ys</span> function must work for arbitrary array
+sizes. You might be tempted to hardwire your solution for 64-element
+arrays by simply coding 64 copy instructions, but this would be a bad
+idea because we will be grading your solution based on its performance
+on arbitrary arrays.
+</li><li class="li-itemize">Your <span style="font-family:monospace">ncopy.ys</span> function must run correctly with <span style="font-variant:small-caps">yis</span>.
+By correctly, we mean that it must correctly copy the <span style="font-family:monospace">src</span> block
+<em>and</em> return (in <span style="font-family:monospace">%rax</span>) the correct number of positive integers.</li><li class="li-itemize">The assembled version of your <span style="font-family:monospace">ncopy</span> file must not be
+more than 1000 bytes long. You can check the length of any program
+with the <span style="font-family:monospace">ncopy</span> function embedded using the provided script
+<span style="font-family:monospace">check-len.pl</span>:
+<pre><span style="font-size:small">
+unix&gt; </span><span style="font-size:small"><em> ./check-len.pl &lt; ncopy.yo</em></span><span style="font-size:small">
+</span></pre></li><li class="li-itemize">Your <span style="font-family:monospace">pipe-full.hcl</span> implementation must pass the 
+regression tests in <span style="font-family:monospace">../y86-code</span> and <span style="font-family:monospace">../ptest</span>
+(without the <span style="font-family:monospace">-i</span> flag that tests <span style="font-family:monospace">iaddq</span>).
+</li></ul><p>Other than that, you are free to implement the <span style="font-family:monospace">iaddq</span> instruction
+if you think that will help.
+You may make any semantics preserving transformations to the <span style="font-family:monospace">ncopy.ys</span> function, such as reordering instructions, replacing
+groups of instructions with single instructions, deleting some
+instructions, and adding other instructions. You may find it useful
+to read about loop unrolling in Section 5.8 of CS:APP3e.</p><!--TOC subsection id="sec11" Building and Running Your Solution-->
+<h3 id="sec11" class="subsection">Building and Running Your Solution</h3><!--SEC END --><p>In order to test your solution, you will need to build a driver
+program that calls your <span style="font-family:monospace">ncopy</span> function. We have provided you
+with the <span style="font-family:monospace">gen-driver.pl</span> program that generates a driver
+program for arbitrary sized input arrays. For example, typing</p><pre><span style="font-size:small">
+unix&gt; </span><span style="font-size:small"><em> make drivers</em></span><span style="font-size:small">
+</span></pre><p>
+will construct the following two useful driver programs:</p><ul class="itemize"><li class="li-itemize">
+<span style="font-family:monospace">sdriver.yo</span>: A <em>small driver program</em> that tests
+an <span style="font-family:monospace">ncopy</span> function on small arrays with 4 elements. 
+If your solution is correct, then this program will halt with a value
+of 2 in register <span style="font-family:monospace">%rax</span> after copying the <span style="font-family:monospace">src</span>
+array.</li><li class="li-itemize"><span style="font-family:monospace">ldriver.yo</span>: A <em>large driver program</em> that tests
+an <span style="font-family:monospace">ncopy</span> function on larger arrays with 63 elements. If
+your solution is correct, then this program will halt with a value of
+31 (<span style="font-family:monospace">0x1f</span>) in register <span style="font-family:monospace">%rax</span> after copying the
+<span style="font-family:monospace">src</span> array.
+</li></ul><p>
+Each time you modify your <span style="font-family:monospace">ncopy.ys</span> program, you can 
+rebuild the driver programs by typing
+</p><pre><span style="font-size:small">
+unix&gt; </span><span style="font-size:small"><em> make drivers</em></span><span style="font-size:small">
+</span></pre><p>
+Each time you modify your <span style="font-family:monospace">pipe-full.hcl</span> file, you 
+can rebuild the simulator by typing 
+</p><pre><span style="font-size:small">
+unix&gt; </span><span style="font-size:small"><em> make psim VERSION=full</em></span><span style="font-size:small">
+</span></pre><p>
+If you want to rebuild the simulator and the driver programs, type
+</p><pre><span style="font-size:small">
+unix&gt; </span><span style="font-size:small"><em> make VERSION=full</em></span><span style="font-size:small">
+</span></pre><p>To test your solution in GUI mode on a small 4-element array, type
+</p><pre><span style="font-size:small">
+unix&gt; </span><span style="font-size:small"><em> ./psim -g sdriver.yo</em></span><span style="font-size:small">
+</span></pre><p>
+To test your solution on a larger 63-element array, type
+</p><pre><span style="font-size:small">
+unix&gt; </span><span style="font-size:small"><em> ./psim -g ldriver.yo</em></span><span style="font-size:small">
+</span></pre><p>
+Once your simulator correctly runs your version of <span style="font-family:monospace">ncopy.ys</span> on 
+these two block lengths,
+you will want to perform the following additional tests:
+</p><ul class="itemize"><li class="li-itemize">
+<em>Testing your driver files on the ISA simulator.</em> Make 
+sure that your <span style="font-family:monospace">ncopy.ys</span> function works properly with
+<span style="font-variant:small-caps">yis</span>:
+<pre><span style="font-size:small">
+unix&gt; </span><span style="font-size:small"><em> make drivers</em></span><span style="font-size:small">
+unix&gt; </span><span style="font-size:small"><em> ../misc/yis sdriver.yo</em></span><span style="font-size:small">
+</span></pre></li><li class="li-itemize"><em>Testing your code on a range of block lengths with the ISA
+simulator.</em> The Perl script <span style="font-family:monospace">correctness.pl</span> generates driver
+files with block lengths from 0 up to some limit (default 65), plus
+some larger sizes. It
+simulates them (by default with <span style="font-variant:small-caps">yis</span>), and checks the results. It
+generates a report showing the status for each block length:
+<pre><span style="font-size:small">
+unix&gt; </span><span style="font-size:small"><em> ./correctness.pl</em></span><span style="font-size:small">
+</span></pre>
+This script generates test programs where the result count varies
+randomly from one run to another, and so it provides a more stringent
+test than the standard drivers.<p>If you get incorrect results for some length <span style="font-style:italic">K</span>, you can generate a
+driver file for that length that includes checking code, and where the
+result varies randomly:
+</p><pre><span style="font-size:small">
+unix&gt; </span><span style="font-size:small"><em> ./gen-driver.pl -f ncopy.ys -n </em></span><span style="font-size:small"><span style="font-style:italic">K</span></span><span style="font-size:small"><em> -rc &gt; driver.ys</em></span><span style="font-size:small">
+unix&gt; </span><span style="font-size:small"><em> make driver.yo</em></span><span style="font-size:small">
+unix&gt; </span><span style="font-size:small"><em> ../misc/yis driver.yo</em></span><span style="font-size:small">
+</span></pre><p>
+The program will end with register <code>%rax</code> having the following
+value:
+</p><dl class="description"><dt class="dt-description">
+<span style="font-weight:bold"><span style="font-family:monospace">0xaaaa</span></span></dt><dd class="dd-description">: All tests pass.
+</dd><dt class="dt-description"><span style="font-weight:bold"><span style="font-family:monospace">0xbbbb</span></span></dt><dd class="dd-description">: Incorrect count
+</dd><dt class="dt-description"><span style="font-weight:bold"><span style="font-family:monospace">0xcccc</span></span></dt><dd class="dd-description">: Function ncopy is more than 1000 bytes long.
+</dd><dt class="dt-description"><span style="font-weight:bold"><span style="font-family:monospace">0xdddd</span></span></dt><dd class="dd-description">: Some of the source data was not copied to its
+destination.
+</dd><dt class="dt-description"><span style="font-weight:bold"><span style="font-family:monospace">0xeeee</span></span></dt><dd class="dd-description">: Some word just before or just after the
+destination region was corrupted.
+</dd></dl></li><li class="li-itemize"><em>Testing your pipeline simulator on the benchmark programs.</em>
+Once your simulator is able to correctly execute <span style="font-family:monospace">sdriver.ys</span>
+and <span style="font-family:monospace">ldriver.ys</span>,
+you should test it against the Y86-64 benchmark programs in 
+<span style="font-family:monospace">../y86-code</span>:
+<pre><span style="font-size:small">
+unix&gt; </span><span style="font-size:small"><em> (cd ../y86-code; make testpsim)</em></span><span style="font-size:small">
+</span></pre>
+This will run <span style="font-family:monospace">psim</span> on the benchmark programs and compare 
+results with <span style="font-variant:small-caps">yis</span>.</li><li class="li-itemize"><em>Testing your pipeline simulator with extensive regression tests.</em>
+Once you can execute the benchmark programs correctly, then you should
+check it with the regression tests in <span style="font-family:monospace">../ptest</span>. For example,
+if your solution implements the <span style="font-family:monospace">iaddq</span> instruction, then
+<pre><span style="font-size:small">
+unix&gt; </span><span style="font-size:small"><em> (cd ../ptest; make SIM=../pipe/psim TFLAGS=-i)</em></span><span style="font-size:small">
+</span></pre></li><li class="li-itemize"><em>Testing your code on a range of block lengths with the pipeline simulator.</em>
+Finally, you can run the same code tests on the pipeline simulator that you did earlier with the ISA simulator
+<pre><span style="font-size:small">
+unix&gt; </span><span style="font-size:small"><em> ./correctness.pl -p</em></span><span style="font-size:small">
+</span></pre>
+</li></ul>
+<!--TOC section id="sec12" Evaluation-->
+<h2 id="sec12" class="section">7&nbsp;&nbsp;Evaluation</h2><!--SEC END --><p>The lab is worth 115 points: 30 points for Part A, 25 points for Part B,
+and 100 points for Part C.</p><!--TOC subsection id="sec13" Part A-->
+<h3 id="sec13" class="subsection">Part A</h3><!--SEC END --><p>
+Part A is worth 30 points, 15 points for each Y86-64 solution
+program. Each solution program will be evaluated for correctness,
+including proper handling of registers,
+as well as functional equivalence with the example C functions in
+<span style="font-family:monospace">examples.c</span>.</p><p>The program <span style="font-family:monospace">expr.ys</span> will be considered correct if the graders
+do not spot any errors in it, and it sets <code>y</code> to <code>0xff</code> on
+test 1, and to <code>0x0d</code> on test 2.</p><p>The program <span style="font-family:monospace">copy.ys</span> will be considered correct if 
+the graders do not spot any errors in it, 
+and the
+<span style="font-family:monospace">copy_block</span> 
+function returns the sum <span style="font-family:monospace">0xcba</span> in register <span style="font-family:monospace">%rax</span>,
+copies the three 64-bit values <span style="font-family:monospace">0x00a</span>, <span style="font-family:monospace">0x0b</span>, and
+<span style="font-family:monospace">0xc</span> to the 24 bytes
+beginning at 
+address <span style="font-family:monospace">dest</span>, and does not corrupt other memory locations.</p><!--TOC subsection id="sec14" Part B-->
+<h3 id="sec14" class="subsection">Part B</h3><!--SEC END --><p>This part of the lab is worth 25 points: 
+</p><ul class="itemize"><li class="li-itemize">
+<!-- 10 points for your description of the computations required 
+for the <span style="font-family:monospace">iaddq</span> instruction. -->
+</li><li class="li-itemize">10 points for passing the benchmark regression tests in
+<span style="font-family:monospace">y86-code</span>, to verify that your simulator still correctly
+executes the benchmark suite.
+</li><li class="li-itemize">15 points for passing the regression tests in <span style="font-family:monospace">ptest</span> 
+for <span style="font-family:monospace">iaddq</span>.
+</li></ul><!--TOC subsection id="sec15" Part C-->
+<h3 id="sec15" class="subsection">Part C</h3><!--SEC END --><p>
+This part of the Lab is worth 100 points: 
+<span style="font-weight:bold">You will not receive any credit if either your code 
+for </span><span style="font-weight:bold"><span style="font-family:monospace">ncopy.ys</span></span><span style="font-weight:bold"> or your 
+modified simulator fails any of the tests described earlier.</span>
+</p><ul class="itemize"><li class="li-itemize">
+20 points each for 
+your descriptions in the headers of <span style="font-family:monospace">ncopy.ys</span> and 
+<span style="font-family:monospace">pipe-full.hcl</span> and the quality of these implementations.</li><li class="li-itemize">60 points for performance. To receive credit here, your
+solution must be correct, as defined earlier. That is, <span style="font-family:monospace">ncopy</span>
+runs correctly with <span style="font-variant:small-caps">yis</span>, and <span style="font-family:monospace">pipe-full.hcl</span> passes
+all tests in <span style="font-family:monospace">y86-code</span> and <span style="font-family:monospace">ptest</span>.<p>We will express the performance of your function in units of <em>cycles per element</em> (CPE). That is, if the simulated code requires
+<span style="font-style:italic">C</span> cycles to copy a block of <span style="font-style:italic">N</span> elements, then the CPE is <span style="font-style:italic">C</span>/<span style="font-style:italic">N</span>.
+The PIPE simulator displays the total number of cycles required to
+complete the program. The baseline version of the
+<span style="font-family:monospace">ncopy</span> function running on the standard PIPE simulator with a
+large 63-element array requires 897 cycles to copy 63 elements, for a
+CPE of 897/63 = 14.24.</p><p>Since some cycles are used to set up the call to <span style="font-family:monospace">ncopy</span> and to
+set up the loop within <span style="font-family:monospace">ncopy</span>, you will find that you will get
+different values of the CPE for different block lengths (generally the
+CPE will drop as <span style="font-style:italic">N</span> increases). We will therefore evaluate the
+performance of your function by computing the average of the CPEs for
+blocks ranging from 1 to 64 elements. You can use the Perl script
+<span style="font-family:monospace">benchmark.pl</span> in the <span style="font-family:monospace">pipe</span> directory
+to run simulations of your <span style="font-family:monospace">ncopy.ys</span>
+code over a range of block lengths and compute the average CPE.
+Simply run the command
+</p><pre><span style="font-size:small">
+unix&gt; </span><span style="font-size:small"><em> ./benchmark.pl</em></span><span style="font-size:small">
+</span></pre><p>
+to see what happens. For example, the baseline version of the
+<span style="font-family:monospace">ncopy</span> function has CPE values ranging between 29.00 and
+14.27, with an average of 15.18. Note that this Perl script does
+not check for the correctness of the answer. Use the script
+<span style="font-family:monospace">correctness.pl</span> for this. </p><p>You should be able to achieve an average CPE of less than 9.00.
+Our best version averages 7.48.
+If your average CPE is <span style="font-style:italic">c</span>, then your score <span style="font-style:italic">S</span> for this portion of the
+lab will be:
+</p><table class="display dcenter"><tbody><tr style="vertical-align:middle"><td class="dcell"><table style="border-spacing:6px;border-collapse:separate;" class="cellpading0"><tbody><tr><td style="text-align:right;white-space:nowrap"><span style="font-style:italic">S</span></td><td style="text-align:center;white-space:nowrap">=</td><td style="text-align:left;white-space:nowrap"><table class="display"><tbody><tr style="vertical-align:middle"><td class="dcell">&#9127;<br>
+&#9130;<br>
+&#9128;<br>
+&#9130;<br>
+&#9129;</td><td class="dcell"><table style="border-spacing:6px;border-collapse:separate;" class="cellpading0"><tbody><tr><td style="text-align:left;white-space:nowrap">0&nbsp;,</td><td style="text-align:left;white-space:nowrap"><span style="font-style:italic">c</span>&nbsp;&gt;&nbsp;10.5&nbsp;</td></tr>
+<tr><td style="text-align:left;white-space:nowrap">20&nbsp;·&nbsp;(10.5&nbsp;&#8722;&nbsp;<span style="font-style:italic">c</span>)&nbsp;,</td><td style="text-align:left;white-space:nowrap">7.50&nbsp;&#8804;&nbsp;<span style="font-style:italic">c</span>&nbsp;&#8804;&nbsp;10.50&nbsp;</td></tr>
+<tr><td style="text-align:left;white-space:nowrap">60&nbsp;,</td><td style="text-align:left;white-space:nowrap"><span style="font-style:italic">c</span>&nbsp;&lt;&nbsp;7.50&nbsp;</td></tr>
+</tbody></table></td><td class="dcell">
+</td></tr>
+</tbody></table></td></tr>
+</tbody></table></td></tr>
+</tbody></table><p>By default, <span style="font-family:monospace">benchmark.pl</span> and <span style="font-family:monospace">correctness.pl</span> compile and
+test <span style="font-family:monospace">ncopy.ys</span>. Use the <span style="font-family:monospace">-f</span> argument to specify a different
+file name. The <span style="font-family:monospace">-h</span> flag gives a complete list of the command
+line arguments.</p></li></ul>
+<!--TOC section id="sec16" Handin Instructions-->
+<h2 id="sec16" class="section">8&nbsp;&nbsp;Handin Instructions</h2><!--SEC END --><p>Make sure you have included your name and ID in a comment at the top
+of each of your handin files. Then identify yourself with your login
+and password:</p><p>
+</p><p><a name="UPLOAD_LOGIN_FORM"></a></p>
+<form action="https://www.enseignement.polytechnique.fr/informatique/INF559/TD_18-19/archlab/INF559-archlab-1.php#UPLOAD_LOGIN_FORM" method="post" class="EditForm">
+<p>
+<input type="hidden" name="Auth_Action" value="Connect">
+<strong>&nbsp;Login&nbsp;:</strong>
+<input name="Auth_Login" type="text" value="" size="64" maxlength="64" style="background: silver; border: none;">
+<strong>&nbsp;Mot de passe&nbsp;:</strong>
+<input name="Auth_Password" type="password" value="" size="20" maxlength="80" style="background: silver; border: none;">
+<input type="submit" value="Connecter" style="border-radius: 10px; background: #e0e0e0; text-decoration: underline; border: none;">
+</p>
+</form>
+<p style="color:#FF0000">
+<strong></strong>
+</p>
+
+<p></p><p>You will be handing in three sets of files:
+</p><ul class="itemize"><li class="li-itemize">
+Part A (Week 1):
+<ul class="itemize"><li class="li-itemize">
+<span style="font-family:monospace">expr.ys</span>
+
+<!--UPLOAD_INF559-archlab#ex_1-->
+
+</li><li class="li-itemize"><span style="font-family:monospace">copy.ys</span>
+
+<!--UPLOAD_INF559-archlab#ex_2-->
+
+</li></ul> </li><li class="li-itemize">Part B (Week 1):
+<ul class="itemize"><li class="li-itemize">
+<span style="font-family:monospace">seq-full.hcl</span>
+
+<!--UPLOAD_INF559-archlab#ex_3-->
+
+</li></ul></li><li class="li-itemize">Part C (Week 2):
+<ul class="itemize"><li class="li-itemize">
+<span style="font-family:monospace">ncopy.ys</span>
+
+<!--UPLOAD_INF559-archlab#ex_4-->
+</li><li class="li-itemize"><span style="font-family:monospace">pipe-full.hcl</span>
+
+<!--UPLOAD_INF559-archlab#ex_5-->
+</li></ul></li></ul>
+<!--TOC section id="sec17" Hints-->
+<h2 id="sec17" class="section">9&nbsp;&nbsp;Hints</h2><!--SEC END --><ul class="itemize"><li class="li-itemize">By design, both <span style="font-family:monospace">sdriver.yo</span> and <span style="font-family:monospace">ldriver.yo</span>
+are small enough to debug with in GUI mode. We find it
+easiest to debug in GUI mode, and suggest that you use it.</li><li class="li-itemize">If you running in GUI mode on a Unix server, make sure
+that you have initialized the DISPLAY environment variable:
+<pre><span style="font-size:small">
+    unix&gt; </span><span style="font-size:small"><em> setenv DISPLAY myhost.edu:0</em></span><span style="font-size:small">
+</span></pre></li><li class="li-itemize">With some X servers, the “Program Code” window begins life
+as a closed icon when you run <span style="font-family:monospace">psim</span> or <span style="font-family:monospace">ssim</span> 
+in GUI mode. Simply click on the icon to expand the window.</li><li class="li-itemize">With some Microsoft 
+Windows-based X servers, the “Memory Contents” window
+will not automatically resize itself. You’ll need to resize the window
+by hand.</li><li class="li-itemize">The <span style="font-family:monospace">psim</span> and <span style="font-family:monospace">ssim</span> simulators 
+terminate with a segmentation fault if you ask them to execute a file
+that is not a valid Y86-64 object file.</li><li class="li-itemize">Be careful, assembly source files must end with an empty line.
+</li></ul><!--CUT END -->
+<!--HTMLFOOT-->
+<!--ENDHTML-->
+<!--FOOTER-->
+<hr style="height:2"><blockquote class="quote"><em>This document was translated from L<sup>A</sup>T<sub>E</sub>X by
+</em><a href="http://hevea.inria.fr/index.html"><em>H</em><em><span style="font-size:small"><sup>E</sup></span></em><em>V</em><em><span style="font-size:small"><sup>E</sup></span></em><em>A</em></a><em>.</em></blockquote>
+
+</body></html>

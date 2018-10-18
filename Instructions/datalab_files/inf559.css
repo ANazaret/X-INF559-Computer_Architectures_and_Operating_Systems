@@ -1,0 +1,27 @@
+/* inf559.css - Francesco Zappa Nardelli */
+
+body {background: #ffffff; margin: 10pt; padding: 10pt; font-size: 12px;
+    color: #000000; font-family: Verdana, sans-serif, arial, helvetica;
+    line-height: 1.4}
+
+
+h1 {font-family: Georgia, Verdana, sans-serif; font-size: 20px;
+    color: #000000; margin: 10px 0 10px 0;}
+h2 {font-family: Georgia, Verdana, sans-serif; font-size: 17px;
+    font-weight: normal; color: #000000; margin: 15px 0px 5px -15px;}
+h3 {font-size: 12px; background: #eeeeee; color: #111111;
+    font-weight: bold; text-align: center; margin: 10px 0 5px 0;
+    padding: 1px 0 1px 0;}
+
+a {text-decoration: underline; color: #a5001d;}
+a:hover {color: #e90b3c;}
+a:focus {outline: none}
+
+.small {font-size: 90%;}
+.noBottomMargin {margin-bottom: 0;}
+.noTopMargin {margin-top: 0;}
+code {font-size: 115%; line-height: 0;}
+
+p, ul, ol {margin: 6px 0 6px 0;}
+li {margin-top: 5px;}
+.li-itemize{margin:1ex -10px;}
