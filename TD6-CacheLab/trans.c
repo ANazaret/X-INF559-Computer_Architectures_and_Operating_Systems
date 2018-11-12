@@ -24,7 +24,7 @@ int is_transpose(int M, int N, int A[N][M], int B[M][N]);
 #define BLOCKSIZE_32x32 8
 #define BLOCKSIZE_64x64_I 8
 #define BLOCKSIZE_64x64_J 8
-#define BLOCKSIZE_61x67_ 16
+#define BLOCKSIZE_61x67_ 8
 
 char transpose_submit_desc[] = "Transpose submission";
 
@@ -128,25 +128,27 @@ void transpose_submit(int M, int N, int A[N][M], int B[M][N]) {
         int cache;
         // 4 local var
 
-        for (bi = 0; bi < N; bi += BLOCKSIZE_61x67_) {
 
-            for (bj = 0; bj < M; bj += BLOCKSIZE_61x67_) {
+
+        for (bj = 0; bj < M; bj += BLOCKSIZE_61x67_) {
+            for (bi = 0; bi < N; bi += BLOCKSIZE_61x67_) {
                 if (bi == bj)
                     continue;
-                for (i = bi; i < bi + BLOCKSIZE_61x67_ && i < N; i++) {
-                    for (j = bj; j < bj + BLOCKSIZE_61x67_ && j < M; j++) {
+                for (i = bi; i < bi + BLOCKSIZE_61x67_ && i < 67; i++) {
+                    for (j = bj; j < bj + BLOCKSIZE_61x67_ && j < 61; j++) {
                         B[j][i] = A[i][j];
                     }
                 }
             }
 
-            for (i = bi; i < bi + BLOCKSIZE_61x67_; i++) {
-                for (j = bi; j < bi + BLOCKSIZE_61x67_; j++) {
+            for (i = bj; i < bj + BLOCKSIZE_61x67_; i++) {
+                for (j = bj; j < bj + BLOCKSIZE_61x67_; j++) {
                     if (j != i)
                         B[j][i] = A[i][j];
                     else {
                         cache = A[i][i];
                     }
+                    //B[j][i] = A[i][j];
                 }
                 B[i][i] = cache;
             }
@@ -178,7 +180,6 @@ void transpose_init_submit(int M, int N, int A[N][M], int B[M][N]) {
         B[i][i] = A[i][i];
     }
 }
-
 
 
 char transpose_64_submit_desc[] = "Clear code for 64x64";
